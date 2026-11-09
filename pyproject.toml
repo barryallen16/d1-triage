@@ -7,16 +7,18 @@ name = "triagemate"
 version = "0.1.0"
 description = "Triage Java static analysis alerts into verdict, reason and fix"
 requires-python = ">=3.10"
-dependencies = ["javalang>=0.13", "numpy", "scikit-learn", "pytest>=8"]
+dependencies = ["javalang>=0.13", "numpy", "scikit-learn", "pytest>=8", "rich>=13.0"]
 
 [project.optional-dependencies]
 model = ["torch", "transformers", "peft", "bitsandbytes", "unsloth"]
 
 [project.scripts]
-triagemate = "triage.cli:main"
+d1-triage = "d1_triage.cli:main"
+triagemate = "d1_triage.cli:main"
+triagemate-legacy = "triage.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["triage*"]
+include = ["d1_triage*", "triage*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
