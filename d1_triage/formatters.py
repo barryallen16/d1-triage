@@ -28,6 +28,13 @@ def print_terminal_results(results: List[TriageResult], model_name: str = "Liqui
             print(f"       Sink: {r.sink_statement}")
             if r.explanation:
                 print(f"       Rationale: {r.explanation}")
+        total_tp = sum(1 for r in results if r.is_exploitable)
+        total_fp = len(results) - total_tp
+        print("\n" + "-" * 80)
+        print("Triage Summary:")
+        print(f"Total Alerts Analyzed: {len(results)}")
+        print(f"True Positives (Exploitable): {total_tp}")
+        print(f"False Positives (Filtered): {total_fp}")
         return
 
     # Rich formatted output with responsive columns

@@ -201,9 +201,9 @@ def source_path(raw, repo):
 def repo_relative(src, repo):
     """Stable path for IDs: repo-relative when possible, basename otherwise."""
     try:
-        return str(src.resolve().relative_to(Path(repo).resolve()))
+        return Path(src).resolve().relative_to(Path(repo).resolve()).as_posix()
     except ValueError:
-        return src.name
+        return Path(src).name
 
 
 TEST_SOURCE = ("/src/test/", "/src/testFixtures/", "/src/it/", "/test/java/")

@@ -79,10 +79,11 @@ def load_semgrep_json(json_path: Path) -> List[TriageFinding]:
 def load_benchmark_sample(benchmark_name: str, limit: int = 5) -> List[TriageFinding]:
     """Load sample findings from the local benchmark dataset."""
     root = Path(__file__).resolve().parent.parent
+    data_dir = root / "data" if (root / "data").exists() else root / "work" / "data"
     if benchmark_name.lower() == "vul4j":
-        target = root / "work" / "data" / "vul4j-eval" / "scan-labeled.jsonl"
+        target = data_dir / "vul4j-eval" / "scan-labeled.jsonl"
     else:
-        target = root / "work" / "data" / "ghsa-eval" / "labels.jsonl"
+        target = data_dir / "ghsa-eval" / "labels.jsonl"
 
     if not target.exists():
         sys.exit(f"Benchmark file not found: {target}")

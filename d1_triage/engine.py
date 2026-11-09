@@ -108,8 +108,13 @@ class D1TriageEngine:
     def device(self) -> str:
         if self._device:
             return self._device
-        import torch
-        return "cuda" if torch.cuda.is_available() else "cpu"
+        if self.mock:
+            return "cpu"
+        try:
+            import torch
+            return "cuda" if torch.cuda.is_available() else "cpu"
+        except ImportError:
+            return "cpu"
 
     def load(self):
         """Lazy load the d1-3B model on target device (CPU or CUDA)."""

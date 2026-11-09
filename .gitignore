@@ -7,9 +7,9 @@
 *.tar.gz
 test_*.json
 
-# local logs and audit notes — never commit
-opencode-debug.log
-ASSESSMENT.md
+# local logs and audit notes - never commit
+*.log
+*.tmp
 
 # pipeline data lives on huggingface, fetched via scripts/download_data.sh
 datasets/**/*.jsonl
