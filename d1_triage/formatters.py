@@ -90,7 +90,7 @@ def print_terminal_results(results: List[TriageResult], model_name: str = "Liqui
             badge = "[red]EXPLOITABLE[/red]" if r.is_exploitable else "[green]SAFE / FP[/green]"
             exp_lines.append(f"[bold]{r.finding_id}[/bold] ({badge} - {r.rule.split('.')[-1]}):")
             exp_lines.append(f"  [italic]{r.explanation}[/italic]\n")
-        console.print(Panel("\n".join(exp_lines).strip(), title="Triage Remediation & Analysis Rationale", border_style="cyan", expand=False))
+        console.print(Panel("\n".join(exp_lines).strip(), title="Deterministic Remediation Guidance", border_style="cyan", expand=False))
 
     noise_reduction = (total_fp / len(results) * 100.0) if results else 0.0
     avg_latency = (total_time / len(results)) if results else 0.0
@@ -99,7 +99,7 @@ def print_terminal_results(results: List[TriageResult], model_name: str = "Liqui
         f"[bold]Total Alerts Analyzed:[/bold] {len(results)}\n"
         f"[bold red]True Positives (Exploitable):[/bold red] {total_tp} (require remediation)\n"
         f"[bold green]False Positives (Filtered):[/bold green] {total_fp} (suppressed safe patterns)\n"
-        f"[bold cyan]Noise Reduction:[/bold cyan] {noise_reduction:.1f}% developer time saved\n"
+        f"[bold cyan]Filtered False Alarm Rate:[/bold cyan] {noise_reduction:.1f}%\n"
         f"[bold yellow]Average Latency:[/bold yellow] {avg_latency:.1f} ms per alert"
     )
     console.print(Panel(summary_text, title="Triage Summary", expand=False))

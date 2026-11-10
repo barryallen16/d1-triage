@@ -105,3 +105,32 @@ def test_json_export(tmp_path):
     assert len(data) == 1
     assert data[0]["id"] == "EXPORT-01"
     assert "is_exploitable" in data[0]
+
+
+def test_load_semgrep_json_expands_file_context(tmp_path):
+    from d1_triage.cli import load_semgrep_json
+
+    src_file = tmp_path / "App.java"
+    src_lines = [f"// line {i}" for i in range(1, 30)]
+    src_lines[14] = "File f = new File(baseDir, path);"
+    src_file.write_text("\n".join(src_lines), encoding="utf-8")
+
+    semgrep_report = tmp_path / "semgrep.json"
+    semgrep_report.write_text(json.dumps({
+        "results": [{
+            "check_id": "rule.path-traversal",
+            "path": str(src_file),
+            "start": {"line": 15},
+            "extra": {
+                "message": "Dangerous path",
+                "metadata": {"cwe": ["CWE-22"]},
+                "lines": "File f = new File(baseDir, path);",
+            }
+        }]
+    }), encoding="utf-8")
+
+    findings = load_semgrep_json(semgrep_report)
+    assert len(findings) == 1
+    assert "// line 1" in findings[0].code_window or "// line 5" in findings[0].code_window
+    assert "File f = new File(baseDir, path);" in findings[0].code_window
+

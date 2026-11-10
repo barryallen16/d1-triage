@@ -64,6 +64,24 @@ def load_semgrep_json(json_path: Path) -> List[TriageFinding]:
         msg = r.get("extra", {}).get("message", "")
         code_lines = r.get("extra", {}).get("lines", "")
 
+        # When source file exists on disk, expand context around flagged line
+        path_obj = Path(path)
+        if not path_obj.is_absolute():
+            candidate = json_path.parent / path_obj
+            if candidate.exists():
+                path_obj = candidate
+            elif (Path.cwd() / path_obj).exists():
+                path_obj = Path.cwd() / path_obj
+
+        if path_obj.exists() and path_obj.is_file():
+            try:
+                all_lines = path_obj.read_text(encoding="utf-8", errors="replace").splitlines()
+                lo = max(0, line - 16)
+                hi = min(len(all_lines), line + 15)
+                code_lines = "\n".join(all_lines[lo:hi])
+            except Exception:
+                pass
+
         findings.append(TriageFinding(
             id=f"SEMGREP-{idx+1:03d}",
             rule=rule_id,
