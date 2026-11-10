@@ -1,40 +1,56 @@
-# Run locally without a Kaggle GPU
+# Run TriageMate locally
 
-The full model scorer needs CUDA, unsloth, and semgrep. If you don't have a GPU,
-use the heuristic scorer instead - it ranks Semgrep alerts by severity and needs
-only Python and Java.
+This guide covers running the d1-triage developer tool on standard CPU or GPU, as well as accessing legacy scoring pipelines.
 
-## Heuristic scorer (no GPU)
+## 1. Quick local run (d1-3B)
+
+The primary tool uses Liquid AI's d1-3B foundation model to triage static analysis findings.
 
 ```bash
-uv venv
+# Set up environment
 uv sync
-uv tool install semgrep   # or: pipx install semgrep
 
-uv run triagemate path/to/java/project --scorer heuristic --json
+# Run interactive showcase with mock engine (no model download required)
+uv run python d1_triage.py --demo --mock
+
+# Triage a Semgrep JSON scan report
+uv run python d1_triage.py --scan semgrep-findings.json --output triage-report.json
+
+# Sample real alerts from benchmark sets
+uv run python d1_triage.py --benchmark ghsa --limit 5 --mock
+uv run python d1_triage.py --benchmark vul4j --limit 5 --mock
 ```
 
-Output is JSONL with `p_tp`, `why`, and `fix` fields. The model is not used, so
-this works on any machine.
-
-## Full model scorer (needs CUDA)
+Install the `model` dependency group when running live model inference with PyTorch:
 
 ```bash
 uv sync --extra model
-uv run triagemate path/to/java/project \
-    --adapter path/to/adapter \
-    --json
+uv run python d1_triage.py --scan semgrep-findings.json
 ```
 
-The adapter is published at
-[barryallen16/triagemate/qlora-adapter.zip](https://huggingface.co/datasets/barryallen16/triagemate/resolve/main/qlora-adapter.zip).
+## 2. Docker container
 
-## Docker
-
-Build once, run anywhere:
+Build and run in a self-contained Linux container with Java 17 and Semgrep pre-installed:
 
 ```bash
+# Build image
 docker build -t triagemate .
-docker run --rm -v $(pwd)/my-java-project:/src triagemate \
-    /src --scorer heuristic --json
+
+# Run demo showcase
+docker run --rm triagemate --demo --mock
+
+# Scan a local project directory mounted into the container
+docker run --rm -v $(pwd)/my-project:/src triagemate --scan /src/findings.json
+```
+
+## 3. Legacy pipeline (Phase 1 QLoRA / Heuristic)
+
+The original Phase 1 research tools remain available via the `triagemate-legacy` command:
+
+```bash
+# Heuristic ranking (no model required)
+uv run triagemate-legacy path/to/java/project --scorer heuristic --json
+
+# Legacy QLoRA model (requires CUDA and model extras)
+uv run triagemate-legacy path/to/java/project --adapter path/to/adapter --json
 ```

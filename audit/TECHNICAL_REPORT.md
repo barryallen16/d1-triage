@@ -100,5 +100,5 @@ This design provides concrete systems advantages over standard transformer archi
 The complete benchmark evaluation can be reproduced on any machine with Python 3.10+ and standard numerical libraries:
 
 ```bash
-python work/audit/evaluate_d1.py
+python audit/evaluate_d1.py
 ```
