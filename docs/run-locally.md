@@ -10,7 +10,7 @@ The primary tool uses Liquid AI's d1-3B foundation model to triage static analys
 # Set up environment
 uv sync
 
-# Run interactive showcase with mock engine (no model download required)
+# Run interactive demo with mock engine (no model download required)
 uv run python d1_triage.py --demo --mock
 
 # Triage a Semgrep JSON scan report
@@ -36,7 +36,7 @@ Build and run in a self-contained Linux container with Java 17 and Semgrep pre-i
 # Build image
 docker build -t triagemate .
 
-# Run demo showcase
+# Run demo
 docker run --rm triagemate --demo --mock
 
 # Scan a local project directory mounted into the container

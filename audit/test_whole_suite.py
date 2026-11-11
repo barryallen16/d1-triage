@@ -1,4 +1,4 @@
-"""Comprehensive End-to-End Test Suite for Liquid AI d1-3B Benchmark & Triage Toolkit."""
+"""End-to-end verification suite for Liquid AI d1-3B benchmark and triage toolkit."""
 import json
 import subprocess
 import sys

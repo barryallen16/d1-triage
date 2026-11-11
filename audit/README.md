@@ -6,7 +6,7 @@ This directory contains the audit scripts, benchmark predictions, patch ground-t
 
 - `evaluate_d1.py`: One-command benchmark evaluation table across all four gate levels (L0 to L3) and Vul4J.
 - `compare_all_phases.py`: Side-by-side comparison across heuristic baseline, targeted sink prompt, hybrid criteria, and contrastive LoRA.
-- `test_whole_suite.py`: Comprehensive 19-test verification suite checking data integrity, prediction completeness, sink finding, and CLI operation.
+- `test_whole_suite.py`: 19-test verification suite checking data integrity, prediction completeness, sink finding, and CLI operation.
 - `test_ensemble.py`: Ensembling sensitivity sweep testing blends of rule priors and code discrimination scores.
 
 ## Research report
@@ -34,3 +34,7 @@ This directory contains the audit scripts, benchmark predictions, patch ground-t
 
 - `patches/`: 67 patch diff files for evaluated GHSA advisories.
 - `heldout_patches/`: 40 patch diff files used strictly for contrastive training.
+
+## Archive
+
+- `archive/`: Legacy scoring scripts, intermediate sensitivity dumps, and scratchpads preserved for provenance.

@@ -1,61 +1,30 @@
-## prompt used to generate synthetic dataset from LLM . 
-### this process is done repeatedly till we get the desired amount of synthetic records.
+# Synthetic dataset generation prompt
 
-``` 
-Act as a Java security expert specializing in vulnerability classification. Generate a diverse set of Java code samples in JSONL format that clearly demonstrate both vulnerable and secure coding practices. For each sample, provide:
+This document records the prompt template used during Phase 1 for LLM-assisted synthetic vulnerability dataset creation.
+As documented in [leak-audit.md](file:///C:/Users/rjaya/Desktop/currently-working-projects/triagemate/notes/leak-audit.md) and [TECHNICAL_REPORT.md](file:///C:/Users/rjaya/Desktop/currently-working-projects/triagemate/audit/TECHNICAL_REPORT.md), models trained purely on synthetic samples suffered from distribution collapse on real-world vulnerabilities.
+This led to the contrastive git-diff fine-tuning strategy adopted in Phase 3.
 
-Realistic, syntactically correct Java code (40-200 lines)
+## Specification
 
-Clear classification as VULNERABLE/NOT_VULNERABLE
+- Target: Java source snippets demonstrating vulnerable and secure coding constructs.
+- Categories: OWASP Top 10, SANS Top 25, CWE Top 25.
+- Class balance: 60% vulnerable, 40% secure.
+- Output format: JSONL records containing `code`, `classification`, and `vulnerability_type`.
 
-Specific vulnerability type (CWE number/name for vulnerable cases, "safe" for secure code)
+## Prompt template
+
+```text
+Act as a Java security expert specializing in vulnerability classification.
+Generate a diverse set of Java code samples in JSONL format that demonstrate both vulnerable and secure coding practices.
+
+For each sample, provide:
+- Java code (40 to 200 lines)
+- Classification as VULNERABLE or NOT_VULNERABLE
+- Specific vulnerability type (CWE identifier or "safe")
 
 Requirements:
-
-Code Generation:
-
-Include vulnerabilities from OWASP Top 10, SANS 25, and CWE Top 25
-
-Cover these vulnerability types (with examples):
-
-Injection (SQL, OS, LDAP)
-
-Broken Authentication
-
-Sensitive Data Exposure
-
-XXE
-
-Broken Access Control
-
-Security Misconfiguration
-
-XSS
-
-Insecure Deserialization
-
-Using Components with Known Vulnerabilities
-
-Insufficient Logging & Monitoring
-
-Dataset Quality:
-
-60% vulnerable / 40% secure samples
-
-No duplicate code patterns
-
-Varied contexts: web apps, microservices, Android, libraries
-
-Different Java versions (8-17 features)
-
-Multiple coding styles (verbose, concise, functional)
-
-Realistic class/method names
-
-give in the format of 
-{
-"code":code,
-"classification":[VULNERABLE/NOT_VULNERABLE],
-"vulnerability_type": specific vulnerability type such as cwe ,
-}
+- Cover injection, broken authentication, sensitive data exposure, XXE, broken access control, security misconfiguration, XSS, and insecure deserialization.
+- Maintain varied contexts (web services, microservices, libraries).
+- Output JSON format:
+  {"code": "...", "classification": "...", "vulnerability_type": "..."}
 ```

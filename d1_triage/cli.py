@@ -159,7 +159,7 @@ def main():
         print(f"\n[d1-triage] Loaded {len(findings)} findings from {args.benchmark.upper()} benchmark")
     else:
         # Default to demo if no argument provided
-        print("\nNo scan input specified. Defaulting to --demo showcase.")
+        print("\nNo scan input specified. Defaulting to --demo.")
         print("Use 'python -m d1_triage --help' or 'python d1_triage.py --help' to see all options.\n")
         findings = DEMO_FINDINGS
 

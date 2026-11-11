@@ -60,7 +60,7 @@ class TriageResult:
 
 
 def generate_explanation(finding: TriageFinding, is_exploitable: bool, sink_stmt: str) -> str:
-    """Generate concise 1-sentence developer remediation or false-positive rationale."""
+    """Deterministic CWE-level remediation hint or safe-pattern description."""
     rule_lower = finding.rule.lower()
     cwe_lower = finding.cwe.lower()
 

@@ -1,6 +1,5 @@
-"""Standalone One-Command Evaluation Suite for LiquidAI d1-3B Benchmark Reproduction.
+"""Evaluation suite for LiquidAI d1-3B static analysis alert triage benchmarks.
 
-Designed for zero-dependency local reproduction by the Liquid AI research team.
 Calculates:
 - All four triage gate levels (L0, L1, L2, L3) with exact rank-based AUC and P@90R.
 - Weighted within-rule discrimination across Semgrep rule families.
@@ -8,9 +7,9 @@ Calculates:
 - Vul4J cross-repository triage metrics.
 
 Usage:
-    python evaluate_d1.py               # Evaluates all variants in a clean side-by-side table
-    python evaluate_d1.py --targeted    # Evaluates targeted sink in-context prompt
-    python evaluate_d1.py --lora        # Evaluates contrastive LoRA adapter
+    python audit/evaluate_d1.py               # Evaluates all variants side-by-side
+    python audit/evaluate_d1.py --targeted    # Evaluates targeted sink in-context prompt
+    python audit/evaluate_d1.py --lora        # Evaluates contrastive LoRA adapter
 """
 import argparse
 import json

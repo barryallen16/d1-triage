@@ -12,8 +12,8 @@ It automates the triage of static application security testing (SAST) warnings d
 
 ## Quick Start
 
-### 1. Interactive Demo Showcase
-Run the built-in demonstration showcasing real-world True Positive versus False Positive triage:
+### 1. Interactive Demo
+Run the built-in demo evaluating a verified vulnerability against a guarded false alarm:
 
 ```bash
 python d1_triage.py --demo

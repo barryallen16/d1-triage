@@ -23,10 +23,10 @@ from pathlib import Path
 
 MODEL = "LiquidAI/d1-3B"
 DATA_URL = os.environ.get(
-    "TRIGEMATE_DATA_URL",
+    "TRIAGEMATE_DATA_URL",
     "https://huggingface.co/datasets/barryallen16/triagemate/"
     "resolve/main/ghsa-scan-labeled.jsonl")
-WORK = Path(os.environ.get("TRIGEMATE_WORK", "/kaggle/working"))
+WORK = Path(os.environ.get("TRIAGEMATE_WORK", "/kaggle/working"))
 if not WORK.exists():
     WORK = Path("/tmp")
 OUT_IDENTITY = WORK / "d1_targeted_identity_ghsa.jsonl"

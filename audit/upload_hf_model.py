@@ -22,7 +22,7 @@ base_model: LiquidAI/d1-3B
 pipeline_tag: text-classification
 ---
 
-# Liquid AI d1-3B: Top Real-World Java Static Analysis Alert Triage
+# Liquid AI d1-3B: Real-World Java Static Analysis Alert Triage Benchmark
 
 This repository hosts the benchmark reproduction suite, evaluation artifacts, and contrastive fine-tuning code for **Liquid AI's d1-3B hybrid foundation model** applied to real-world static analysis alert triage.
 
@@ -45,9 +45,9 @@ Evaluated on 174 real-world Java security findings across 68 GitHub advisories (
 
 ## Key Findings
 
-1. **#1 on Verified Fix Hunks (L3)**:
-   - On clean vulnerability fix hunks matching the reported CWE, `d1-3B` achieves **0.8372 AUC**, beating Kev-4B (0.7167) by **+12.05% AUC**.
-2. **#1 on the Vul4J Benchmark**:
+1. **Verified Fix Hunks (L3)**:
+   - On clean vulnerability fix hunks matching the reported CWE, `d1-3B` achieves **0.8372 AUC**, exceeding Kev-4B (0.7167) by **+12.05% AUC**.
+2. **Vul4J Benchmark Evaluation**:
    - Across the complete population of Semgrep security findings on 126 Vul4J projects, `d1-3B` achieves **0.8000 AUC** and **0.5556 P@90R**, beating Kev-4B (0.6667) by **+13.33% AUC**.
 3. **Fixed Within-Rule Discrimination**:
    - Zero-shot d1-3B previously suffered from a 0.4297 within-rule AUC due to source line number disconnect.
@@ -122,7 +122,7 @@ def main():
         path_in_repo="README.md",
         repo_id=REPO_ID,
         repo_type="model",
-        commit_message="add comprehensive model card and benchmark leaderboard",
+        commit_message="add model card and benchmark leaderboard",
     )
     print("  [Uploaded] README.md")
 

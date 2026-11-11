@@ -37,7 +37,7 @@ Confusion matrix for the 200-case run: 91 TP / 3 FN / 3 FP / 103 TN.
 
 ## Older 102-case sweep (weak evidence)
 
-From June-July 2025 notes (`misc/evaulation.md`). Only the Mistral row has a
+From June-July 2025 notes (`misc/evaluation.md`). Only the Mistral row has a
 per-case file; the other three rows were never saved. With n=102 the 95% CI is
 roughly ±8 pts, so the 7B-vs-14B gap (2 cases) is noise, not a finding.
 
@@ -147,8 +147,8 @@ expect to be run from their own directory rather than from the repo root:
 - `java_eval_new.ipynb` - the 200-case evaluation of the published adapter,
   with stored outputs.
 - `misc/` - validation scripts (`validate-jsonl-file.py`, `check-datasets.py`,
-  `before-tesing.py`), raw test cases (`120-testcases.txt`), the per-case
-  Mistral result (`eval-res1.txt`) and the evaluation summary (`evaulation.md`).
+  `before-testing.py`), raw test cases (`120-testcases.txt`), the per-case
+  Mistral result (`eval-res1.txt`) and the evaluation summary (`evaluation.md`).
 - `../all-unorganized-code/` - the original working folders, the project archives
   (`.zip`, `.7z`) and the upstream source corpora, kept for provenance
   (sibling of repo root, outside git).

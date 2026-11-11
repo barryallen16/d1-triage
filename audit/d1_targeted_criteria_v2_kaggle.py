@@ -19,15 +19,15 @@ from pathlib import Path
 
 MODEL = "LiquidAI/d1-3B"
 GHSA_URL = os.environ.get(
-    "TRIGEMATE_DATA_URL",
+    "TRIAGEMATE_DATA_URL",
     "https://huggingface.co/datasets/barryallen16/triagemate/"
     "resolve/main/ghsa-scan-labeled.jsonl")
 VUL4J_URL = os.environ.get(
-    "TRIGEMATE_VUL4J_URL",
+    "TRIAGEMATE_VUL4J_URL",
     "https://huggingface.co/datasets/barryallen16/triagemate/"
     "resolve/main/vul4j-scan-labeled.jsonl")
 
-WORK = Path(os.environ.get("TRIGEMATE_WORK", "/content" if Path("/content").exists() else "/kaggle/working"))
+WORK = Path(os.environ.get("TRIAGEMATE_WORK", "/content" if Path("/content").exists() else "/kaggle/working"))
 if not WORK.exists():
     WORK = Path("/tmp")
 
