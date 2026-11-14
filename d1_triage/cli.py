@@ -1,10 +1,8 @@
 """Command-Line Interface for Liquid AI d1-3B Alert Triage."""
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
-from typing import List
 
 from d1_triage.engine import D1TriageEngine, TriageFinding
 from d1_triage.formatters import print_terminal_results, save_json_report
@@ -48,7 +46,7 @@ DEMO_FINDINGS = [
 ]
 
 
-def load_semgrep_json(json_path: Path) -> List[TriageFinding]:
+def load_semgrep_json(json_path: Path) -> list[TriageFinding]:
     """Parse Semgrep standard JSON scan output into TriageFindings."""
     with open(json_path, encoding="utf-8") as fh:
         data = json.load(fh)
@@ -64,7 +62,7 @@ def load_semgrep_json(json_path: Path) -> List[TriageFinding]:
         msg = r.get("extra", {}).get("message", "")
         code_lines = r.get("extra", {}).get("lines", "")
 
-        # When source file exists on disk, expand context around flagged line
+
         path_obj = Path(path)
         if not path_obj.is_absolute():
             candidate = json_path.parent / path_obj
@@ -79,7 +77,7 @@ def load_semgrep_json(json_path: Path) -> List[TriageFinding]:
                 lo = max(0, line - 16)
                 hi = min(len(all_lines), line + 15)
                 code_lines = "\n".join(all_lines[lo:hi])
-            except Exception:
+            except (OSError, UnicodeDecodeError):
                 pass
 
         findings.append(TriageFinding(
@@ -94,7 +92,7 @@ def load_semgrep_json(json_path: Path) -> List[TriageFinding]:
     return findings
 
 
-def load_benchmark_sample(benchmark_name: str, limit: int = 5) -> List[TriageFinding]:
+def load_benchmark_sample(benchmark_name: str, limit: int = 5) -> list[TriageFinding]:
     """Load sample findings from the local benchmark dataset."""
     root = Path(__file__).resolve().parent.parent
     data_dir = root / "data" if (root / "data").exists() else root / "work" / "data"
@@ -142,10 +140,10 @@ def main():
 
     args = parser.parse_args()
 
-    # Determine execution device
+
     device = "cpu" if args.cpu else ("cuda" if args.gpu else None)
 
-    # Resolve findings
+
     if args.demo:
         findings = DEMO_FINDINGS
         print("\n[d1-triage] Running built-in demonstration (1 Real Exploitable TP vs 1 Guarded FP)...")
@@ -158,25 +156,25 @@ def main():
         findings = load_benchmark_sample(args.benchmark, limit=args.limit)
         print(f"\n[d1-triage] Loaded {len(findings)} findings from {args.benchmark.upper()} benchmark")
     else:
-        # Default to demo if no argument provided
+
         print("\nNo scan input specified. Defaulting to --demo.")
         print("Use 'python -m d1_triage --help' or 'python d1_triage.py --help' to see all options.\n")
         findings = DEMO_FINDINGS
 
-    # Initialize Engine
+
     engine = D1TriageEngine(
         model_name=args.model,
         device=device,
         mock=args.mock,
     )
 
-    # Run Triage
+
     results = engine.triage_batch(findings, threshold=args.threshold)
 
-    # Format & Print
+
     print_terminal_results(results, model_name=args.model, device=engine.device)
 
-    # Export if requested
+
     if args.output:
         save_json_report(results, args.output)
 

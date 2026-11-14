@@ -1,6 +1,6 @@
 """Unit tests for Liquid AI d1-triage engine, sink finder, and CLI."""
 import json
-from pathlib import Path
+
 from d1_triage.engine import D1TriageEngine, TriageFinding
 from d1_triage.sink_finder import build_annotated_prompt, find_sink_line
 

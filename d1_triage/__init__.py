@@ -9,6 +9,6 @@ __all__ = [
     "D1TriageEngine",
     "TriageFinding",
     "TriageResult",
-    "find_sink_line",
     "build_annotated_prompt",
+    "find_sink_line",
 ]

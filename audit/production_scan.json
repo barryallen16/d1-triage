@@ -1,0 +1,93 @@
+{
+  "version": "1.80.0",
+  "results": [
+    {
+      "check_id": "java.lang.security.audit.path-traversal.path-traversal",
+      "path": "src/main/java/org/apache/camel/component/file/FileEndpoint.java",
+      "start": { "line": 145, "col": 9 },
+      "end": { "line": 145, "col": 55 },
+      "extra": {
+        "message": "Untrusted user parameter concatenated directly into File path constructor without canonical directory containment check.",
+        "metadata": { "cwe": ["CWE-22"], "confidence": "HIGH" },
+        "lines": "File targetFile = new File(baseDir, request.getParameter(\"fileName\"));\nreturn new FileInputStream(targetFile);"
+      }
+    },
+    {
+      "check_id": "java.lang.security.audit.path-traversal.path-traversal",
+      "path": "src/main/java/org/apache/camel/component/file/SafeFileHandler.java",
+      "start": { "line": 88, "col": 9 },
+      "end": { "line": 88, "col": 55 },
+      "extra": {
+        "message": "Potential directory traversal detected at File constructor.",
+        "metadata": { "cwe": ["CWE-22"], "confidence": "MEDIUM" },
+        "lines": "File target = new File(baseDir, request.getParameter(\"file\")).getCanonicalFile();\nif (!target.getPath().startsWith(baseDir.getCanonicalPath())) {\n    throw new SecurityException(\"Directory traversal detected\");\n}\nreturn new FileInputStream(target);"
+      }
+    },
+    {
+      "check_id": "java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing",
+      "path": "src/main/java/org/apache/ivy/util/XMLHelper.java",
+      "start": { "line": 210, "col": 9 },
+      "end": { "line": 210, "col": 65 },
+      "extra": {
+        "message": "XML parser initialized without disabling external entity resolution (XXE).",
+        "metadata": { "cwe": ["CWE-611"], "confidence": "HIGH" },
+        "lines": "DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();\nDocumentBuilder db = dbf.newDocumentBuilder();\nreturn db.parse(inputStream);"
+      }
+    },
+    {
+      "check_id": "java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing",
+      "path": "src/main/java/org/apache/ivy/util/SafeXMLHelper.java",
+      "start": { "line": 45, "col": 9 },
+      "end": { "line": 45, "col": 65 },
+      "extra": {
+        "message": "XML parser initialized without disabling external entity resolution (XXE).",
+        "metadata": { "cwe": ["CWE-611"], "confidence": "MEDIUM" },
+        "lines": "DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();\ndbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);\ndbf.setFeature(\"http://apache.org/xml/features/disallow-doctype-decl\", true);\nDocumentBuilder db = dbf.newDocumentBuilder();\nreturn db.parse(inputStream);"
+      }
+    },
+    {
+      "check_id": "java.lang.security.audit.sql.sql-injection",
+      "path": "src/main/java/org/apache/kylin/query/QueryService.java",
+      "start": { "line": 312, "col": 9 },
+      "end": { "line": 312, "col": 45 },
+      "extra": {
+        "message": "Dynamic SQL query formed with string concatenation.",
+        "metadata": { "cwe": ["CWE-89"], "confidence": "HIGH" },
+        "lines": "String query = \"SELECT user_id, email FROM users WHERE org_id = '\" + orgId + \"' AND role = 'admin'\";\nStatement stmt = connection.createStatement();\nreturn stmt.executeQuery(query);"
+      }
+    },
+    {
+      "check_id": "java.lang.security.audit.sql.sql-injection",
+      "path": "src/main/java/org/apache/kylin/query/SafeQueryService.java",
+      "start": { "line": 78, "col": 9 },
+      "end": { "line": 78, "col": 45 },
+      "extra": {
+        "message": "Dynamic SQL query formed with string concatenation.",
+        "metadata": { "cwe": ["CWE-89"], "confidence": "MEDIUM" },
+        "lines": "String sql = \"SELECT user_id, email FROM users WHERE org_id = ? AND role = ?\";\ntry (PreparedStatement stmt = connection.prepareStatement(sql)) {\n    stmt.setString(1, orgId);\n    stmt.setString(2, role);\n    return stmt.executeQuery();\n}"
+      }
+    },
+    {
+      "check_id": "java.lang.security.audit.deserialization.object-deserialization",
+      "path": "src/main/java/org/apache/flink/runtime/RemotePayloadHandler.java",
+      "start": { "line": 165, "col": 9 },
+      "end": { "line": 165, "col": 40 },
+      "extra": {
+        "message": "Untrusted stream deserialization via ObjectInputStream.readObject().",
+        "metadata": { "cwe": ["CWE-502"], "confidence": "HIGH" },
+        "lines": "ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());\nObject payload = ois.readObject();\nreturn payload;"
+      }
+    },
+    {
+      "check_id": "java.lang.security.audit.deserialization.object-deserialization",
+      "path": "src/main/java/org/apache/flink/runtime/GuardedPayloadHandler.java",
+      "start": { "line": 92, "col": 9 },
+      "end": { "line": 92, "col": 40 },
+      "extra": {
+        "message": "Untrusted stream deserialization via ObjectInputStream.readObject().",
+        "metadata": { "cwe": ["CWE-502"], "confidence": "MEDIUM" },
+        "lines": "ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());\nois.setObjectInputFilter(ObjectInputFilter.Config.createFilter(\"org.apache.flink.runtime.messages.*;!*\"));\nreturn ois.readObject();"
+      }
+    }
+  ]
+}

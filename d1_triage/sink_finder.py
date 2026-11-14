@@ -1,12 +1,11 @@
 """Statement-level sink finder for static analysis alert triage."""
 import re
-from typing import List, Optional, Tuple
 
 RULE_PATTERNS = {
     'documentbuilderfactory': [r'DocumentBuilderFactory', r'DocumentBuilder', r'getDocBuilder', r'parserFactory', r'builderFactory'],
     'transformerfactory': [r'TransformerFactory', r'Transformer', r'newTransformer'],
     'saxparserfactory': [r'SAXParserFactory', r'newSAXParser', r'SAXParser'],
-    'path-traversal': [r'new\s+File\b', r'Paths\.get\b', r'getResource\b', r'FileInputStream\b', r'openStream\b', r'getRequestedFile\b', r'File\b'],
+    'path-traversal': [r'new\s+File\s*\([^)]*,[^)]+\)', r'new\s+File\b', r'Paths\.get\b', r'getResource\b', r'FileInputStream\b', r'openStream\b', r'getRequestedFile\b', r'File\b'],
     'formatted-sql-string': [r'String\.format\b', r'createQuery\b', r'prepareStatement\b', r'SELECT\b', r'execute\b', r'\+'],
     'object-deserialization': [r'new\s+ObjectInputStream\b', r'\.readObject\b', r'ObjectInputStream\b', r'readUnshared\b', r'resolveClass\b'],
     'unrestricted-request-mapping': [r'@RequestMapping\b', r'@GetMapping\b', r'@PostMapping\b'],
@@ -24,7 +23,7 @@ RULE_PATTERNS = {
 }
 
 
-def find_sink_line(code_window: str, rule_name: str) -> Tuple[int, str]:
+def find_sink_line(code_window: str, rule_name: str) -> tuple[int, str]:
     """Find the most likely dangerous sink line index and content within a code window."""
     lines = code_window.splitlines()
     if not lines:
@@ -33,13 +32,13 @@ def find_sink_line(code_window: str, rule_name: str) -> Tuple[int, str]:
     rule_key = rule_name.lower().split('.')[-1]
     patterns = RULE_PATTERNS.get(rule_key, [])
 
-    # Search for pattern match
+
     for pat in patterns:
         for idx, line in enumerate(lines):
             if re.search(pat, line, re.IGNORECASE):
                 return idx, line.strip()
 
-    # Fallback: choose middle non-empty statement
+
     mid = len(lines) // 2
     for offset in range(len(lines)):
         for candidate in (mid + offset, mid - offset):
@@ -68,7 +67,7 @@ def build_annotated_prompt(code_window: str, rule: str, cwe: str, line_no: int,
     header = [
         f"Rule: {rule}",
         f"CWE: {cwe}",
-        f"Severity: WARNING",
+        "Severity: WARNING",
         f"File: {file_path.split('/')[-1]}",
         f"Flagged Line: {line_no}",
     ]

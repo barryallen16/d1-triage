@@ -1,6 +1,5 @@
 """Tests for triage/dataset.py - method windows and name neutralization."""
-from triage.dataset import build_window, neutralize, method_ranges
-
+from triage.dataset import build_window, method_ranges, neutralize
 
 SRC = """package foo;
 
@@ -32,7 +31,7 @@ def test_method_ranges_finds_methods():
 
 
 def test_build_window_returns_enclosing_method():
-    # Line 8 is inside safeMethod.
+
     name, window = build_window(SRC, 8, None, juliet=False)
     assert name == "safeMethod"
     assert "safeMethod" in window
@@ -40,7 +39,7 @@ def test_build_window_returns_enclosing_method():
 
 
 def test_build_window_line_outside_method():
-    # Line 2 is the package declaration - no enclosing method.
+
     assert build_window(SRC, 2, None, juliet=False) is None
 
 
@@ -50,15 +49,15 @@ def test_neutralize_flips_prefix_per_row():
     rng_b = __import__("random").Random(2)
     out_a = neutralize(code, rng_a)
     out_b = neutralize(code, rng_b)
-    # Original good/bad names must not leak.
+
     for out in (out_a, out_b):
         assert "good1" not in out and "bad2" not in out
-    # good1 appears before bad2 in the source, so whichever prefix comes
-    # first in the output is the one assigned to good1.
+
+
     good_a_funcA = out_a.find("funcA1") < out_a.find("funcB1")
     good_b_funcA = out_b.find("funcA1") < out_b.find("funcB1")
     assert good_a_funcA != good_b_funcA
-    # Across seeds both mapping directions appear.
+
     import random
 
     seen_good_funcA = set()

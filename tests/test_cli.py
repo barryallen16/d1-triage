@@ -12,10 +12,10 @@ def test_heuristic_score_returns_valid_probability():
 def test_heuristic_score_info():
     row = {"severity": "INFO", "message": ""}
     p, _ = heuristic_score(row)
-    assert p == 0.25  # INFO severity = 1 / 4
+    assert p == 0.25
 
 
 def test_heuristic_score_unknown_severity():
     row = {"severity": "NOTICE", "message": ""}
     p, _ = heuristic_score(row)
-    assert p == 0.5  # default WARNING = 2 / 4
+    assert p == 0.5

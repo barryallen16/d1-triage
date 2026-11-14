@@ -1,18 +1,19 @@
 # d1-triage: Local Static Analysis Alert Triage CLI
 
-`d1-triage` is a standalone developer tool powered by Liquid AI's `d1-3B` foundation model.
-It automates the triage of static application security testing (SAST) warnings directly on developer laptops and CI runners.
+`d1-triage` triages static analysis security warnings on local workstations and CI runners using Liquid AI's `d1-3B` foundation model.
+It ranks alerts by exploitability so developers can review real vulnerabilities before investigating false alarms.
 
 ## Highlights
 
-- CPU and GPU Native: Executes on standard multi-core CPUs in 1 to 2 seconds per alert without requiring an Nvidia GPU.
-- Statement-Level Sink Grounding: Automatically identifies the exact dangerous statement flagged by static scanners.
-- Semgrep Native: Ingests standard Semgrep JSON scan reports directly.
-- Noise Reduction: Filters non-exploitable patterns and guards to reduce developer alert fatigue.
+- Runs on standard multi-core CPUs in 1 to 2 seconds per alert without requiring a GPU.
+- Identifies and anchors the exact dangerous statement flagged by the scanner.
+- Reads standard Semgrep JSON scan reports directly.
+- Filters non-exploitable patterns and guards to reduce alert volume.
 
 ## Quick Start
 
 ### 1. Interactive Demo
+
 Run the built-in demo evaluating a verified vulnerability against a guarded false alarm:
 
 ```bash
@@ -20,6 +21,7 @@ python d1_triage.py --demo
 ```
 
 ### 2. Triage a Semgrep Scan Report
+
 Scan your project with Semgrep and pass the JSON output directly to `d1-triage`:
 
 ```bash
@@ -28,6 +30,7 @@ python d1_triage.py --scan semgrep-report.json --output triage-summary.json
 ```
 
 ### 3. Triage Benchmark Findings
+
 Evaluate alerts directly from the GHSA or Vul4J benchmark sets:
 
 ```bash
@@ -36,6 +39,7 @@ python d1_triage.py --benchmark vul4j --limit 5
 ```
 
 ### 4. Fast Integration Dry-Run
+
 Test pipeline parsing and report generation without downloading model weights:
 
 ```bash

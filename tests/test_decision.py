@@ -3,8 +3,12 @@ import pytest
 
 from triage.cli import main
 from triage.decision import (
-    OPTIONS, QUESTION, confidence_of, decision_input, option_token_ids,
-    prompt_of, state_of,
+    QUESTION,
+    confidence_of,
+    decision_input,
+    option_token_ids,
+    prompt_of,
+    state_of,
 )
 
 
@@ -89,7 +93,7 @@ def test_confidence_is_distance_from_the_tie():
 
 
 def test_cli_accepts_the_decision_scorer():
-    # Parsing must accept "decision" before any model is loaded.
+
     with pytest.raises(SystemExit) as excinfo:
         main(["/no/such/path", "--scorer", "decision"])
     assert "no such path" in str(excinfo.value)

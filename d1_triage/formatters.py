@@ -1,24 +1,24 @@
 """Output formatters for d1-triage CLI (Rich terminal UI and JSON)."""
 import json
-from typing import List
 
 from d1_triage.engine import TriageResult
 
 
-def print_terminal_results(results: List[TriageResult], model_name: str = "LiquidAI/d1-3B", device: str = "cpu", show_explanations: bool = True):
+def print_terminal_results(results: list[TriageResult], model_name: str = "LiquidAI/d1-3B", device: str = "cpu", show_explanations: bool = True):
     """Print results using Rich terminal formatting."""
     try:
         from rich import box
         from rich.console import Console
         from rich.panel import Panel
         from rich.table import Table
-        # Use comfortable width for table readability
-        console = Console(width=100)
+        raw_console = Console()
+        width = max(raw_console.width, 120) if raw_console.width else 120
+        console = Console(width=width)
     except ImportError:
         console = None
 
     if console is None:
-        # Plain text fallback
+
         print("\n" + "=" * 80)
         print(f" Liquid AI d1-3B Triage Results | Device: {device.upper()}")
         print("=" * 80)
@@ -37,7 +37,7 @@ def print_terminal_results(results: List[TriageResult], model_name: str = "Liqui
         print(f"False Positives (Filtered): {total_fp}")
         return
 
-    # Rich formatted output with responsive columns
+
     table = Table(
         title=f"Static Analysis Triage Report ({model_name} on {device.upper()})",
         show_header=True,
@@ -83,7 +83,7 @@ def print_terminal_results(results: List[TriageResult], model_name: str = "Liqui
     console.print()
     console.print(table)
 
-    # Print explanations panel if requested
+
     if show_explanations and any(r.explanation for r in results):
         exp_lines = []
         for r in results:
@@ -105,7 +105,7 @@ def print_terminal_results(results: List[TriageResult], model_name: str = "Liqui
     console.print(Panel(summary_text, title="Triage Summary", expand=False))
 
 
-def save_json_report(results: List[TriageResult], out_path: str):
+def save_json_report(results: list[TriageResult], out_path: str):
     """Save structured triage results to a JSON file."""
     data = [
         {

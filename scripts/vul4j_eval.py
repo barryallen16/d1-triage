@@ -1,4 +1,4 @@
-"""Evaluate TriageMate on real vul4j vulnerabilities.
+"""Evaluate d1-triage on real vul4j vulnerabilities.
 
 Checks out vulnerable versions of selected vul4j entries, runs Semgrep, and
 writes findings for triage scoring. Labels are derived from the known
@@ -15,10 +15,10 @@ ROOT = Path(__file__).resolve().parent.parent
 CSV = ROOT / "benchmarks" / "vul4j" / "dataset" / "vul4j_dataset.csv"
 OUT = ROOT / "data" / "vul4j-eval"
 
-# CWEs that Semgrep's security rules cover - these are the ones we can label.
+
 TARGET_CWES = {"CWE-22", "CWE-78", "CWE-79", "CWE-611", "CWE-74", "CWE-77"}
 
-# Map CWE to Semgrep rule families for labeling.
+
 CWE_TO_RULE = {
     "CWE-22": "path-traversal",
     "CWE-78": "command-injection",
@@ -59,12 +59,12 @@ def checkout_vulnerable(entry, dest):
     repo_dir = dest / entry["vul_id"]
     if repo_dir.exists():
         return repo_dir
-    # Full clone (needed to reach historical patch commits)
+
     subprocess.run(
         ["git", "clone", f"https://github.com/{entry['repo']}.git", str(repo_dir)],
         check=True, capture_output=True,
     )
-    # Checkout parent of patch commit (vulnerable version)
+
     subprocess.run(
         ["git", "-C", str(repo_dir), "checkout", f"{entry['patch_commit']}^"],
         check=True, capture_output=True,
@@ -100,7 +100,7 @@ def main():
             scan = run_semgrep(repo_dir, scan_file)
             n = len(scan.get("results", []))
             print(f"  Semgrep findings: {n}")
-            # Save entry metadata alongside scan
+
             meta_file = OUT / "scans" / f"{entry['vul_id']}.meta.json"
             meta_file.write_text(json.dumps(entry, indent=2))
         except subprocess.CalledProcessError as e:
