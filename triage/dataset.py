@@ -19,13 +19,11 @@ ROOT = Path(__file__).resolve().parent.parent
 BENCH = ROOT / "benchmarks"
 DATA = ROOT / "data"
 
-# Phase 1 split: test/val get whole CWE families the model never trains on.
-# SQL injection (CWE-89) stays in train because it is by far the largest family;
-# the test claim rests on five other families instead.
+
 TEST_FAMILIES = {"CWE-22", "CWE-78", "CWE-79", "CWE-90", "CWE-643"}
 VAL_FAMILIES = {"CWE-327", "CWE-328", "CWE-601"}
 
-# Per-CWE mitigation text for the FIX line. Falls back to generic advice.
+
 FIXES = {
     "CWE-22": "resolve the path and reject it unless it stays inside the intended directory",
     "CWE-78": "avoid the shell; pass arguments as a list to ProcessBuilder and validate them",
@@ -42,16 +40,16 @@ FIXES = {
 }
 GENERIC_FIX = "validate or sanitize the untrusted value before it reaches the sink"
 
-COMMENT_RE = re.compile(r"/\*.*?\*/|//[^\n]*", re.S)
-VERDICT_WORD_RE = re.compile(r"\b(good\w*|bad\w*)", re.I)
-LEAK_COMMENT_RE = re.compile(r"POTENTIAL FLAW|FIX:|FLAW", re.I)
+COMMENT_RE = re.compile(r"/\*.*?\*/|//[^\n]*", re.DOTALL)
+VERDICT_WORD_RE = re.compile(r"\b(good\w*|bad\w*)", re.IGNORECASE)
+LEAK_COMMENT_RE = re.compile(r"POTENTIAL FLAW|FIX:|FLAW", re.IGNORECASE)
 MODIFIERS = (
     "public|private|protected|static|final|synchronized|abstract|native|strictfp|default"
 )
 SIG_RE = re.compile(
     r"^[ \t]*(?:(?:" + MODIFIERS + r")\s+)*[\w.$<>\[\],? ]+?\s+(\w+)\s*"
     r"\([^;{}]*\)\s*(?:throws [\w., ]+)?\s*\{",
-    re.M,
+    re.MULTILINE,
 )
 
 
@@ -188,7 +186,7 @@ def neutralize(code, rng):
 
 def class_decl(src):
     m = re.search(r"^[ \t]*(?:public\s+)?(?:final\s+|abstract\s+)?class\s+\w+[^{]*\{",
-                  src, re.M)
+                  src, re.MULTILINE)
     return m.group(0).strip() if m else ""
 
 
@@ -248,7 +246,9 @@ def load_owasp_expected():
 
 
 def frozen_juliet_files():
-    path = ROOT / "model-evaluation" / "juliet-heldout-1000-neutral.csv"
+    path = ROOT / "model-evaluation" / "juliet-heldout-1000-neutral-v2.csv"
+    if not path.exists():
+        path = ROOT / "model-evaluation" / "juliet-heldout-1000-neutral.csv"
     if not path.exists():
         return set()
     names = set()
@@ -345,7 +345,7 @@ def build(scan_path, suite, out, test_families, val_families, seed=1611):
         })
         stats[label] += 1
 
-    # Leak check: identical normalized windows must not straddle train/test.
+
     hashes = defaultdict(set)
     for r in rows:
         h = hashlib.sha256(re.sub(r"\s+", "", r["code_window"]).encode()).hexdigest()
@@ -400,7 +400,7 @@ def main():
                 fh.write(json.dumps(r, ensure_ascii=False) + "\n")
         print(f"{split}: {len(rows)} rows, labels {dict(Counter(r['label'] for r in rows))}, "
               f"families {dict(Counter(r['family'] for r in rows).most_common())}")
-    # Fixed 200-row stratified sample for the paid/untrained baselines.
+
     test = by_split["test"]
     rng = random.Random(1611)
     tp = [r for r in test if r["label"] == "TP"]

@@ -116,7 +116,7 @@ def main():
     api = HfApi()
     print(f"Uploading artifacts to Hugging Face: {REPO_ID}...")
 
-    # Upload README.md (Model Card)
+
     api.upload_file(
         path_or_fileobj=MODEL_CARD.encode("utf-8"),
         path_in_repo="README.md",
@@ -126,7 +126,7 @@ def main():
     )
     print("  [Uploaded] README.md")
 
-    # Files to upload
+
     files_to_upload = [
         ("contrastive_train.jsonl", "contrastive_train.jsonl"),
         ("d1_lora_identity_ghsa.jsonl", "d1_lora_identity_ghsa.jsonl"),

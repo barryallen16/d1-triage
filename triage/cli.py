@@ -1,4 +1,4 @@
-"""TriageMate CLI: `triagemate path/to/project`.
+"""d1-triage CLI: `d1-triage path/to/project`.
 
 Runs Semgrep, extracts a method window per alert, scores it with the triage
 model, and prints real bugs first with a reason and a fix.
@@ -11,9 +11,10 @@ import tempfile
 from pathlib import Path
 
 from triage.dataset import build_window
-from triage.explain import explain
 from triage.decision import MODEL as DECISION_MODEL
-from triage.decision import REVISION as DECISION_REVISION, DecisionScorer
+from triage.decision import REVISION as DECISION_REVISION
+from triage.decision import DecisionScorer
+from triage.explain import explain
 from triage.prompts import INSTRUCTIONS, SYSTEM
 
 RULES = ["--config", "p/default", "--config", "p/security-audit",
@@ -100,7 +101,7 @@ def heuristic_score(row):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="triagemate")
+    ap = argparse.ArgumentParser(prog="d1-triage")
     ap.add_argument("path")
     ap.add_argument("--model", default="unsloth/Qwen2.5-Coder-7B-Instruct-bnb-4bit")
     ap.add_argument("--adapter", default="")

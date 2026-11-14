@@ -120,7 +120,7 @@ def checkout(entry, force=False):
         shutil.rmtree(dest, ignore_errors=True)
         return None, f"could not resolve patch commit {patch}: {exc}"
     entry["patch_commit"] = patch
-    # Depth 2 gets the fix commit and its parent without a full clone.
+
     res = git(dest, "init", "-q")
     res = git(dest, "remote", "add", "origin", f"https://github.com/{entry['repo']}.git")
     res = git(dest, "fetch", "-q", "--depth", "2", "origin", patch, timeout=1800)

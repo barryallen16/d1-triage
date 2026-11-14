@@ -9,9 +9,9 @@ The patched and original files must both exist. `--mode javac` takes a classpath
 import argparse
 import json
 import subprocess
-from collections import Counter
 import sys
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 RULES = ["--config", "p/default", "--config", "p/security-audit",

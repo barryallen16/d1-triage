@@ -24,10 +24,10 @@ OUT = ROOT / "data" / "ghsa-eval"
 ZIP_URL = "https://osv-vulnerabilities.storage.googleapis.com/Maven/all.zip"
 COMMIT = re.compile(r"https://github\.com/([^/\s]+)/([^/\s#]+)/commit/([0-9a-f]{40})")
 
-# CWE order sets the round-robin rotation, without over-weighting one family.
+
 CWE_ORDER = ["CWE-611", "CWE-22", "CWE-78", "CWE-89", "CWE-94", "CWE-502",
              "CWE-918", "CWE-601", "CWE-79", "CWE-74", "CWE-77", "CWE-1336"]
-# Maven coordinates also cover JavaScript shipped in Java projects.
+
 NON_JAVA_REPO = re.compile(r"(?i)(jquery|bootstrap|angular|react|vue|node-|"
                            r"-js$|/js/|dompurify|ckeditor|tinymce|swagger-ui)")
 

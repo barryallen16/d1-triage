@@ -24,7 +24,7 @@ from triage.decision import (
     MODEL, REVISION, decision_input, option_token_ids, prompt_of,
 )
 
-TEST_URL = ("https://huggingface.co/datasets/barryallen16/triagemate/"
+TEST_URL = ("https://huggingface.co/datasets/barryallen16/d1-triage/"
             "resolve/main/triage-v1.tar.gz")
 
 
@@ -90,7 +90,7 @@ def main():
     started_all = time.time()
     with out.open("w", encoding="utf-8") as fh:
         for i, row in enumerate(rows, 1):
-            # Clip before rendering so the whole prompt fits the sequence.
+
             clipped = dict(row)
             if len(clipped.get("code_window", "")) > args.max_chars:
                 clipped["code_window"] = clipped["code_window"][:args.max_chars]

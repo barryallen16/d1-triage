@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 
 AUDIT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = Path(os.environ.get("TRIAGEMATE_ROOT", str(AUDIT_DIR.parent if AUDIT_DIR.name == "audit" else AUDIT_DIR)))
+REPO_ROOT = Path(os.environ.get("D1_TRIAGE_ROOT", str(AUDIT_DIR.parent if AUDIT_DIR.name == "audit" else AUDIT_DIR)))
 AUDIT = REPO_ROOT / "audit" if (REPO_ROOT / "audit").exists() else REPO_ROOT / "work" / "audit"
 DATA = REPO_ROOT / "data" if (REPO_ROOT / "data").exists() else REPO_ROOT / "work" / "data"
 
@@ -41,10 +41,10 @@ p_lora = load_p(AUDIT / "d1_lora_identity_ghsa.jsonl")
 
 if p_base_path.exists():
     p_base = load_p(p_base_path)
-    # Let's test combinations of p_base (rule prior) and p_targeted / p_lora (code discrimination)
+
     print("=== Testing Ensemble Combinations ===")
     for alpha in [0.0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0]:
-        # Blend: alpha * p_targeted + (1 - alpha) * p_base
+
         blend = alpha * p_targeted + (1 - alpha) * p_base
         l0_auc = S.auc(defs["L0"], blend)
         l0_w = B.weighted_within_rule(defs["L0"], blend, rules)

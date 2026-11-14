@@ -31,9 +31,9 @@ def target(row):
     return f"VERDICT: {row['label']}\nWHY: {row['reason']}\nFIX: {row['fix']}"
 
 
-VERDICT_RE = re.compile(r"VERDICT:\s*(TP|FP)", re.I)
-WHY_RE = re.compile(r"WHY:\s*(.+)", re.I)
-FIX_RE = re.compile(r"FIX:\s*(.+)", re.I)
+VERDICT_RE = re.compile(r"VERDICT:\s*(TP|FP)", re.IGNORECASE)
+WHY_RE = re.compile(r"WHY:\s*(.+)", re.IGNORECASE)
+FIX_RE = re.compile(r"FIX:\s*(.+)", re.IGNORECASE)
 
 
 def parse(text):

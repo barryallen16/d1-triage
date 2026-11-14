@@ -73,7 +73,7 @@ def partial_checkout(entry, force=False):
         return dest, None, f"diff failed: {res.stderr[-300:]}"
     paths = [line for line in res.stdout.splitlines() if line.strip()]
     if paths:
-        # Files added by the fix have no old-side content to scan.
+
         res = v.git(dest, "-c", "core.quotepath=false", "ls-tree", "-r",
                     "--name-only", "-z", f"{sha}^", "--", *paths)
         existing = set(res.stdout.split("\0"))

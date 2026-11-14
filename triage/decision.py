@@ -5,11 +5,10 @@ descriptions go into one prompt, and the score is read from the option logits
 in a single forward pass. No answer sentence is generated, so a decision model
 returns no WHY or FIX prose.
 """
-from pathlib import Path
 
 from triage.prompts import MAX_CHARS
 
-# Pinned the way SemIf pins its reference run, so scores stay comparable.
+
 MODEL = "Qwen/Qwen3.5-4B"
 REVISION = "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a"
 
@@ -67,8 +66,8 @@ def option_token_ids(tokenizer):
     """One token per option, or the readout would compare the wrong logits."""
     ids = []
     for option in OPTIONS:
-        # Keyword form: Qwen3.5 tokenizers are multimodal processors whose
-        # first positional argument means `images`, not text.
+
+
         encoded = tokenizer(text=" " + option["id"], add_special_tokens=False).input_ids
         if len(encoded) != 1:
             raise ValueError(

@@ -22,7 +22,7 @@ def neutralize(code, rng):
     found = sorted({m.group(0) for m in NAMES.finditer(code)})
     good = [n for n in found if n.lower().startswith("good")]
     bad = [n for n in found if n.lower().startswith("bad")]
-    # Flip which neutral prefix means "good" per row, so the prefix carries no label.
+
     if rng.random() < 0.5:
         good_prefix, bad_prefix = "funcA", "funcB"
     else:

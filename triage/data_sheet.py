@@ -1,4 +1,4 @@
-"""Generate the TriageMate data sheet from the built splits."""
+"""Generate the d1-triage data sheet from the built splits."""
 import argparse
 import json
 from collections import Counter
@@ -19,13 +19,13 @@ def table(counter, top=40):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default="data/triage")
-    ap.add_argument("--out", default="notes/data-sheet.md")
+    ap.add_argument("--out", default="data/data-sheet.md")
     args = ap.parse_args()
     d = Path(args.data)
     splits = {s: load(d / f"triage_{s}.jsonl") for s in ("train", "val", "test")}
     all_rows = sum(splits.values(), [])
     lines = [
-        "# TriageMate data sheet",
+        "# d1-triage data sheet",
         "",
         "## What this is",
         "",

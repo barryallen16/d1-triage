@@ -27,7 +27,7 @@ def fetch(repo, sha):
     if path.exists():
         return path.read_text(encoding="utf-8", errors="replace")
     url = f"https://github.com/{repo}/commit/{sha}.patch"
-    req = urllib.request.Request(url, headers={"User-Agent": "triagemate-audit"})
+    req = urllib.request.Request(url, headers={"User-Agent": "d1-triage-audit"})
     text = urllib.request.urlopen(req, timeout=90).read().decode("utf-8", "replace")
     path.write_text(text, encoding="utf-8")
     return text
@@ -81,7 +81,7 @@ def main():
         repo, sha = meta["repo"], meta["patch_commit"]
         try:
             hunks = changed_lines(fetch(repo, sha))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             failures.append((vid, str(exc)))
             continue
         for row in erows:

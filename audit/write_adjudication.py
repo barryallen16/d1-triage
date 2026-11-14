@@ -14,7 +14,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-# (verdict, reason) in packet order.
+
 VERDICTS = [
     ("real", "fix commit adds safe parser configuration and external-access restrictions to the XMLHelper factories, covering the flagged getDocBuilder path"),
     ("real", "patch routes XML without a system ID through EmptyEntityResolver, blocking external entities at the flagged factory"),

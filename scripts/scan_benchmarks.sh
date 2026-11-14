@@ -1,7 +1,3 @@
-#!/usr/bin/env bash
-# Scan the benchmark suites with the TriageMate Semgrep ruleset.
-# Juliet is scanned one CWE directory at a time: a crash or timeout on a single
-# file then costs one chunk instead of the whole run, and finished chunks resume.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -32,7 +28,6 @@ scan_one() {
 export -f scan_one
 export ROOT SCANS
 
-# 4 workers x 2 jobs each keeps the 8 cores busy without a memory spike.
 find "$ROOT/benchmarks/juliet/src/testcases" -maxdepth 1 -type d -name 'CWE*' -print0 \
   | xargs -0 -P4 -I{} bash -c 'scan_one "$@"' _ {}
 echo "scan complete"

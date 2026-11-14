@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
-# Robust path discovery whether run from repo root, work/audit/, or triagemate/audit/
+
 THIS_DIR = Path(__file__).resolve().parent
 if THIS_DIR.name == "audit":
     REPO_ROOT = THIS_DIR.parent.parent if THIS_DIR.parent.name == "work" else THIS_DIR.parent
@@ -99,10 +99,10 @@ def load_dataset():
     hunk = np.array([relabel[r["id"]]["hunk_tp"] for r in rows])
     stored = np.array([r["label"] == "TP" for r in rows])
     defs = {
-        "L0 (Location proxy)": stored.astype(int),
-        "L1 (Clean hunk only)": hunk.astype(int),
-        "L2 (Stored + CWE)": (stored & strict).astype(int),
-        "L3 (Clean hunk + CWE)": (hunk & strict).astype(int),
+        "Commit Proxy (L0)": stored.astype(int),
+        "Diff Hunk (L1)": hunk.astype(int),
+        "CWE Matched (L2)": (stored & strict).astype(int),
+        "Verified Patch (L3 (Clean hunk + CWE))": (hunk & strict).astype(int),
     }
     rules = np.array([r["rule"].split(".")[-1] for r in rows])
     heuristic = np.array([float(r["p_tp"]) for r in rows])
@@ -160,7 +160,7 @@ def main():
     elif args.lora:
         variants = {"d1-3B Contrastive LoRA": variants["d1-3B Contrastive LoRA"]}
 
-    # Print Comparative Table
+
     print(f"\n{'Variant':<25} | {'Level':<18} | {'AUC':<7} | {'P@90R':<7} | {'Within-AUC':<10} | {'Swap Delta':<10}")
     print("-" * 88)
 
@@ -180,7 +180,7 @@ def main():
                 print(f"{vname:<25} | {dname:<18} | {met['auc']:.4f}  | {met['p90']:.4f}  | {met['within_auc']:.4f}     | {met['delta_swap']:+.4f}")
             print("-" * 88)
 
-    # Vul4J Evaluation
+
     vul4j_file = DATA_DIR / "vul4j-eval" / "scan-labeled.jsonl"
     if vul4j_file.exists():
         v_rows = read_jsonl(vul4j_file)

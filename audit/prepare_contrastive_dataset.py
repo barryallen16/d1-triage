@@ -21,7 +21,7 @@ for p in patches:
     cwe = meta.get('cwe_id', 'CWE-Unknown')
     summary = meta.get('summary', 'Security vulnerability fix')
     vul_id = meta.get('vul_id', 'HELD')
-    
+
     txt = p.read_text(encoding='utf-8', errors='ignore')
     diffs = re.split(r'\ndiff --git ', txt)
     for d in diffs[1:]:
@@ -38,7 +38,7 @@ for p in patches:
             if deleted and added and len(pre_lines) >= 4 and len(post_lines) >= 4:
                 file_name = header.split()[-1]
                 idx = len(dataset_rows) // 2
-                # TP row (pre-fix vulnerable code)
+
                 dataset_rows.append({
                     'id': f'{vul_id}:pre:{idx}',
                     'rule': f'java.security.{cwe.lower()}.vulnerability',
@@ -50,7 +50,7 @@ for p in patches:
                     'code_window': '\n'.join(pre_lines),
                     'label': 'TP',
                 })
-                # FP row (post-fix secure patch)
+
                 dataset_rows.append({
                     'id': f'{vul_id}:post:{idx}',
                     'rule': f'java.security.{cwe.lower()}.vulnerability',
