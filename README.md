@@ -2,12 +2,17 @@
   <img src="d1-triage.svg" alt="d1-triage" width="400">
 </p>
 
+<p align="center">
+  <a href="https://huggingface.co/barryallen16/d1-3B-java-vuln-triage"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Model-d1--3B--java--vuln--triage-yellow?style=flat-square" alt="Hugging Face Model"></a>
+  <a href="https://huggingface.co/datasets/barryallen16/d1-triage"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-d1--triage-blue?style=flat-square" alt="Hugging Face Dataset"></a>
+  <a href="https://barryallen16.github.io/d1-triage/"><img src="https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success?style=flat-square" alt="Live Demo"></a>
+  <a href="audit/TECHNICAL_REPORT.md"><img src="https://img.shields.io/badge/Audit-Technical%20Report-purple?style=flat-square" alt="Technical Report"></a>
+</p>
+
 # d1-triage: Static Analysis Alert Triage with Liquid AI d1-3B
 
 Static analysis scanners flag security bugs with high recall, but false-positive rates exceed 70%.
 d1-triage uses Liquid AI's hybrid d1-3B to rank alerts by exploitability in under 15 ms, letting developers review real vulnerabilities first.
-
-Live interactive demo: [https://barryallen16.github.io/d1-triage/](https://barryallen16.github.io/d1-triage/)
 
 ---
 
@@ -93,7 +98,9 @@ python audit/test_whole_suite.py
 
 ## Published artifacts
 
-- Interactive demo: [barryallen16.github.io/d1-triage](https://barryallen16.github.io/d1-triage/)
-- Model weights: [barryallen16/d1-3B-java-vuln-triage](https://huggingface.co/barryallen16/d1-3B-java-vuln-triage)
-- Benchmark dataset: [barryallen16/d1-triage](https://huggingface.co/datasets/barryallen16/d1-triage)
-- Technical report: [audit/TECHNICAL_REPORT.md](audit/TECHNICAL_REPORT.md) (proofs, rule priors, and confidence intervals)
+| Resource | Platform | Link | Description |
+|---|---|---|---|
+| **Model Weights** | Hugging Face | [`barryallen16/d1-3B-java-vuln-triage`](https://huggingface.co/barryallen16/d1-3B-java-vuln-triage) | Fine-tuned Liquid AI d1-3B Q8_0 weights (2.87 GB) |
+| **Benchmark Dataset** | Hugging Face | [`barryallen16/d1-triage`](https://huggingface.co/datasets/barryallen16/d1-triage) | 174 real-world Java alerts across GHSA & Vul4J census |
+| **Interactive Demo** | GitHub Pages | [`barryallen16.github.io/d1-triage`](https://barryallen16.github.io/d1-triage/) | In-browser triage pipeline playground with AST grounding |
+| **Technical Report** | Audit & Proofs | [`audit/TECHNICAL_REPORT.md`](audit/TECHNICAL_REPORT.md) | Empirical proofs, rule priors, and confidence bounds |

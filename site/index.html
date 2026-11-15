@@ -1255,7 +1255,108 @@
       font-family: var(--font-sans);
     }
 
-    
+    .artifacts-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .artifact-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+    }
+
+    .artifact-card:hover {
+      border-color: #38bdf8;
+      background: var(--bg-subtle);
+      transform: translateY(-2px);
+    }
+
+    .artifact-card:active {
+      transform: scale(0.98);
+    }
+
+    .artifact-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .artifact-icon-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.25rem;
+    }
+
+    .artifact-badge {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .artifact-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .artifact-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.015em;
+    }
+
+    .artifact-id {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: #93c5fd;
+      word-break: break-all;
+    }
+
+    .artifact-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    .artifact-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-pink);
+      padding-top: 10px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      transition: gap 120ms ease;
+    }
+
+    .artifact-card:hover .artifact-action {
+      gap: 10px;
+      color: #ffffff;
+    }
+
     footer {
       border-top: 1px solid var(--border);
       padding: 48px 0;
@@ -2172,6 +2273,7 @@
       .pipeline-ribbon { grid-template-columns: repeat(2, 1fr); }
       .pipeline-dock-grid { grid-template-columns: 1fr; }
       .inspector-grid { grid-template-columns: 1fr; }
+      .artifacts-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 860px) {
@@ -2327,6 +2429,9 @@
       .bench-comparison-card {
         padding: 16px 14px;
       }
+      .artifacts-grid {
+        grid-template-columns: 1fr;
+      }
       .bench-table-tabs {
         flex-wrap: wrap;
       }
@@ -2371,6 +2476,7 @@
         <li><a href="#benchmark" onclick="closeMobileNav()">Benchmarks</a></li>
         <li><a href="#architecture" onclick="closeMobileNav()">How It Works</a></li>
         <li><a href="#quickstart" onclick="closeMobileNav()">CLI Quickstart</a></li>
+        <li><a href="#artifacts" onclick="closeMobileNav()">Artifacts</a></li>
       </ul>
       <div class="nav-right">
         <a href="https://github.com/barryallen16/d1-triage" target="_blank" rel="noreferrer" class="nav-cta" aria-label="Star d1-triage on GitHub">
@@ -3399,6 +3505,100 @@
           </div>
           <span class="cli-comment">Benchmark real GHSA alerts on local CPU</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="section" id="artifacts">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">Published Artifacts & Resources</h2>
+        <p class="section-desc">
+          Everything needed to evaluate, reproduce, or deploy d1-triage is openly available across Hugging Face and GitHub.
+        </p>
+      </div>
+
+      <div class="artifacts-grid">
+        <a href="https://huggingface.co/barryallen16/d1-3B-java-vuln-triage" target="_blank" rel="noreferrer" class="artifact-card">
+          <div class="artifact-top">
+            <div class="artifact-icon-wrap" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;">
+              <span>🤗</span>
+            </div>
+            <span class="artifact-badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3);">Model</span>
+          </div>
+          <div class="artifact-body">
+            <h3 class="artifact-title">Hugging Face Model</h3>
+            <span class="artifact-id">barryallen16/d1-3B-java-vuln-triage</span>
+            <p class="artifact-desc">
+              Fine-tuned Liquid AI d1-3B Q8_0 weights (2.87 GB). Calibrated for CPU AST triage with zero runtime leakage.
+            </p>
+          </div>
+          <div class="artifact-action">
+            <span>View Weights</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="https://huggingface.co/datasets/barryallen16/d1-triage" target="_blank" rel="noreferrer" class="artifact-card">
+          <div class="artifact-top">
+            <div class="artifact-icon-wrap" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+              <span>📊</span>
+            </div>
+            <span class="artifact-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">Dataset</span>
+          </div>
+          <div class="artifact-body">
+            <h3 class="artifact-title">Hugging Face Dataset</h3>
+            <span class="artifact-id">datasets/barryallen16/d1-triage</span>
+            <p class="artifact-desc">
+              174 curated real-world Java alerts across 68 GitHub advisories and the complete 126-repository Vul4J census.
+            </p>
+          </div>
+          <div class="artifact-action">
+            <span>Explore Dataset</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="https://github.com/barryallen16/d1-triage/blob/main/audit/TECHNICAL_REPORT.md" target="_blank" rel="noreferrer" class="artifact-card">
+          <div class="artifact-top">
+            <div class="artifact-icon-wrap" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <span class="artifact-badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3);">Audit</span>
+          </div>
+          <div class="artifact-body">
+            <h3 class="artifact-title">Technical Report</h3>
+            <span class="artifact-id">audit/TECHNICAL_REPORT.md</span>
+            <p class="artifact-desc">
+              Empirical proofs, rule priors, paired-control swap deltas, and 95% confidence intervals across benchmarks.
+            </p>
+          </div>
+          <div class="artifact-action">
+            <span>Read Report</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="https://github.com/barryallen16/d1-triage" target="_blank" rel="noreferrer" class="artifact-card">
+          <div class="artifact-top">
+            <div class="artifact-icon-wrap" style="background: rgba(253, 145, 204, 0.15); color: var(--accent-pink);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </div>
+            <span class="artifact-badge" style="background: rgba(253, 145, 204, 0.15); color: var(--accent-pink); border: 1px solid rgba(253, 145, 204, 0.3);">Source</span>
+          </div>
+          <div class="artifact-body">
+            <h3 class="artifact-title">GitHub Repository</h3>
+            <span class="artifact-id">barryallen16/d1-triage</span>
+            <p class="artifact-desc">
+              Standalone CLI, AST grounding engine, Semgrep parser, and full test suite under Apache-2.0.
+            </p>
+          </div>
+          <div class="artifact-action">
+            <span>Star on GitHub</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
       </div>
     </div>
   </section>
