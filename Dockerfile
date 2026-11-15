@@ -5,6 +5,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     semgrep \
     && rm -rf /var/lib/apt/lists/*
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-cache
@@ -12,7 +14,6 @@ RUN uv sync --frozen --no-cache
 COPY d1_triage/ ./d1_triage/
 COPY d1_triage.py ./
 COPY triage/ ./triage/
-COPY training/ ./training/
 
 ENV PATH="/app/.venv/bin:$PATH"
 

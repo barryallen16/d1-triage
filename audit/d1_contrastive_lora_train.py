@@ -222,10 +222,10 @@ def main():
 
     import urllib.request
     ghsa_rows = [json.loads(l) for l in urllib.request.urlopen(
-        "https://huggingface.co/datasets/barryallen16/triagemate/resolve/main/ghsa-scan-labeled.jsonl"
+        "https://huggingface.co/datasets/barryallen16/d1-triage/resolve/main/ghsa-scan-labeled.jsonl"
     ).read().decode().splitlines() if l.strip()]
     vul4j_rows = [json.loads(l) for l in urllib.request.urlopen(
-        "https://huggingface.co/datasets/barryallen16/triagemate/resolve/main/vul4j-scan-labeled.jsonl"
+        "https://huggingface.co/datasets/barryallen16/d1-triage/resolve/main/vul4j-scan-labeled.jsonl"
     ).read().decode().splitlines() if l.strip()]
 
     print("\n--- Evaluating Champion: GHSA Identity ---", flush=True)

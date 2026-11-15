@@ -1,10 +1,10 @@
-# Run TriageMate locally
+# Run d1-triage locally
 
-This guide covers running the d1-triage developer tool on standard CPU or GPU, as well as accessing legacy scoring pipelines.
+This guide covers running the d1-triage developer tool on CPU or GPU, and running the legacy scoring pipeline.
 
-## 1. Quick local run (d1-3B)
+## 1. Local run with d1-3B
 
-The primary tool uses Liquid AI's d1-3B foundation model to triage static analysis findings.
+The main triage tool uses Liquid AI's d1-3B foundation model to score static analysis findings.
 
 ```bash
 # Set up environment
@@ -30,27 +30,27 @@ uv run python d1_triage.py --scan semgrep-findings.json
 
 ## 2. Docker container
 
-Build and run in a self-contained Linux container with Java 17 and Semgrep pre-installed:
+Build and run in a container with Java 17 and Semgrep pre-installed:
 
 ```bash
 # Build image
-docker build -t triagemate .
+docker build -t d1-triage .
 
 # Run demo
-docker run --rm triagemate --demo --mock
+docker run --rm d1-triage --demo --mock
 
 # Scan a local project directory mounted into the container
-docker run --rm -v $(pwd)/my-project:/src triagemate --scan /src/findings.json
+docker run --rm -v $(pwd)/my-project:/src d1-triage --scan /src/findings.json
 ```
 
-## 3. Legacy pipeline (Phase 1 QLoRA / Heuristic)
+## 3. Heuristic baseline pipeline
 
-The original Phase 1 research tools remain available via the `triagemate-legacy` command:
+The heuristic and baseline pipeline remains available via `python -m triage.cli`:
 
 ```bash
 # Heuristic ranking (no model required)
-uv run triagemate-legacy path/to/java/project --scorer heuristic --json
+uv run python -m triage.cli path/to/java/project --scorer heuristic --json
 
-# Legacy QLoRA model (requires CUDA and model extras)
-uv run triagemate-legacy path/to/java/project --adapter path/to/adapter --json
+# QLoRA model (requires CUDA and model extras)
+uv run python -m triage.cli path/to/java/project --adapter path/to/adapter --json
 ```

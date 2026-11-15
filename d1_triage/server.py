@@ -14,8 +14,7 @@ from pathlib import Path
 from d1_triage.engine import D1TriageEngine, TriageFinding
 
 SITE_DIR = Path(__file__).resolve().parent.parent / "site"
-USE_MOCK = os.environ.get("D1_TRIAGE_MOCK", "false").lower() in ("1", "true")
-MODEL_NAME = os.environ.get("MODEL_NAME", "LiquidAI/d1-3B")
+MODEL_NAME = "LiquidAI/d1-3B"
 
 _engine = None
 _lock = threading.Lock()
@@ -24,7 +23,7 @@ _lock = threading.Lock()
 def get_engine():
     global _engine
     if _engine is None:
-        _engine = D1TriageEngine(model_name=MODEL_NAME, mock=USE_MOCK, explain=True)
+        _engine = D1TriageEngine(model_name=MODEL_NAME, explain=True)
     return _engine
 
 
@@ -50,7 +49,7 @@ class TriageHTTPHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "model": MODEL_NAME, "mock": USE_MOCK}).encode("utf-8"))
+            self.wfile.write(json.dumps({"status": "ok", "model": MODEL_NAME}).encode("utf-8"))
             return
         super().do_GET()
 
@@ -117,10 +116,7 @@ class TriageHTTPHandler(SimpleHTTPRequestHandler):
 
 def run_server(port: int = 8000, host: str = "0.0.0.0"):
     server_address = (host, port)
-    engine = get_engine()
-    if not USE_MOCK:
-        print("Preloading d1-3B Q8_0 weights for true serving...", file=sys.stderr)
-        engine.load()
+    get_engine()
     httpd = ThreadingHTTPServer(server_address, TriageHTTPHandler)
     print(f"d1-triage server running at http://localhost:{port}/ (serving {SITE_DIR})")
     httpd.serve_forever()

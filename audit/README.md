@@ -1,18 +1,17 @@
 # Audit and benchmark evaluation suite
 
-This directory contains the audit scripts, benchmark predictions, patch ground-truth data, and technical report for the Liquid AI d1-3B static analysis triage benchmark.
+This directory contains benchmark predictions, ground-truth patches, and evaluation scripts for the Liquid AI d1-3B static analysis triage benchmark.
 
 ## Core entry points
 
-- `evaluate_d1.py`: One-command benchmark evaluation table across all four gate levels (L0 to L3) and Vul4J.
+- `evaluate_d1.py`: Benchmark evaluation table across all four gate levels (L0 to L3) and Vul4J.
 - `compare_all_phases.py`: Side-by-side comparison across heuristic baseline, targeted sink prompt, hybrid criteria, and contrastive LoRA.
 - `test_whole_suite.py`: 19-test verification suite checking data integrity, prediction completeness, sink finding, and CLI operation.
 - `test_ensemble.py`: Ensembling sensitivity sweep testing blends of rule priors and code discrimination scores.
 
 ## Research report
 
-- `TECHNICAL_REPORT.md`: Full technical report detailing methodology, statement anchoring, contrastive LoRA tuning, and systems benchmarks.
-- `adjudication_packet.md`: Manual ground-truth adjudication notes analyzing 64 real-world CVE patches against Semgrep findings.
+- `TECHNICAL_REPORT.md`: Technical report detailing methodology, statement anchoring, contrastive LoRA tuning, and benchmarks.
 - `adjudication.json`: Machine-readable verdicts and rationale for all adjudicated findings.
 
 ## Training and dataset generation
@@ -34,7 +33,3 @@ This directory contains the audit scripts, benchmark predictions, patch ground-t
 
 - `patches/`: 67 patch diff files for evaluated GHSA advisories.
 - `heldout_patches/`: 40 patch diff files used strictly for contrastive training.
-
-## Archive
-
-- `archive/`: Legacy scoring scripts, intermediate sensitivity dumps, and scratchpads preserved for provenance.

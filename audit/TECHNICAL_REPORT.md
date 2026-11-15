@@ -3,9 +3,9 @@
 ## Abstract
 
 Static analysis security testing tools produce high volumes of alerts with false-positive rates frequently exceeding 70 percent.
-Automating alert triage with large language models offers substantial efficiency gains, but existing benchmarks evaluate triage against coarse location proxies rather than verified security fix hunks.
+Automating alert triage with language models offers substantial efficiency gains, but standard benchmarks evaluate triage against coarse location proxies instead of verified security fix hunks.
 In this work, we evaluate Liquid AI's hybrid d1-3B model on real-world Java static analysis alerts from 68 CVE-associated GitHub advisories and the Vul4J benchmark.
-We identify two fundamental failure modes in naive model deployment: swap-window invariance caused by unaligned source line numbers, and distribution collapse resulting from synthetic benchmark fine-tuning.
+We identify two failure modes in naive model deployment: swap-window invariance caused by unaligned source line numbers, and distribution collapse resulting from synthetic benchmark fine-tuning.
 By introducing in-context sink line annotations and contrastive tuning on 416 real-world pre-fix and post-fix git diff pairs, d1-3B achieves within-rule AUC of 0.6321 and outperforms 4-billion-parameter dense transformers on clean hunk ground truth (L3 AUC of 0.8372 versus 0.7167 for Kev-4B), while processing decisions in under 15 milliseconds on a single Nvidia T4 accelerator.
 
 ## 1. Introduction
@@ -14,11 +14,11 @@ Static application security testing (SAST) engines like Semgrep identify unsafe 
 However, because static scanners lack complete inter-procedural reachability information, production repositories routinely experience alert fatigue.
 Security engineers spend significant manual effort filtering non-exploitable findings.
 
-Deploying neural language models to classify findings as True Positives (TP) or False Positives (FP) introduces two core requirements:
-First, the triage model must demonstrate genuine code-level sensitivity rather than categorizing alerts solely by rule names or CWE metadata.
-Second, inference must be computationally efficient to handle continuous integration pipelines without adding minutes to build times.
+Deploying neural models to classify findings as True Positives (TP) or False Positives (FP) introduces two requirements:
+First, the triage model must show genuine sensitivity to code structure, not only rule names or CWE metadata.
+Second, inference must be fast enough to run in continuous integration without adding minutes to build times.
 
-We demonstrate that Liquid AI's d1-3B foundation model satisfies both requirements when evaluated against rigorous, hunk-aligned ground truth.
+Liquid AI's d1-3B foundation model satisfies both requirements when evaluated against hunk-aligned ground truth.
 
 ## 2. Benchmark Definitions and Audit Findings
 
@@ -32,8 +32,8 @@ Following the triage audit framework, we report performance across four hierarch
 - L3 (Hunk plus CWE): Finding line is inside the fix hunk and matches the CVE CWE (28 TP of 174 rows).
 
 Prior audits reported that zero-shot d1-3B suffered from weak within-rule discrimination (within-rule AUC of 0.4297 on L0) and swap-window invariance (delta AUC of +0.0202 when swapping code windows behind identical rules).
-Our analysis identified the root cause: Semgrep reports 1-based line numbers relative to the multi-thousand-line original source file, but the benchmark scanner extracted only the enclosing method body into an unnumbered text snippet.
-The model could not map the reported line number to any token in the prompt, forcing it to fall back on rule name semantics.
+The root cause was line coordinate drift: Semgrep reports 1-based line numbers relative to the original source file, but the benchmark scanner extracted only the enclosing method body into an unnumbered text snippet.
+The model could not map the reported line number to any token in the prompt, forcing it to rely on rule name semantics.
 
 ## 3. Targeted Sink Grounding
 
@@ -52,22 +52,22 @@ When evaluated under identical conditions with paired rule-swap controls (derang
 
 ## 4. Real-to-Real Contrastive Fine-Tuning
 
-Previous attempts to fine-tune d1-3B on synthetic Juliet test cases collapsed generalization (within-rule AUC fell to 0.449 on real data).
+Fine-tuning d1-3B on synthetic Juliet test cases collapsed generalization, dropping within-rule AUC to 0.449 on real data.
 Synthetic benchmarks rely on artificial identifiers like bad() and good(), inducing severe distribution shift when evaluated against real enterprise Java libraries.
 
 To resolve this without data leakage, we extracted 40 security commit patches from held-out advisories in the GHSA pool with zero overlap with the 68 evaluation advisories.
 From these patches, we extracted 208 pre-fix (vulnerable) and 208 post-fix (repaired) method pairs from enterprise repositories including Apache Hadoop, Spring Framework, Jackson, and Guava.
-Because each pair shares identical class structure and rule metadata, the model is compelled to learn genuine defensive programming constructs: parameterization, boundary checks, and feature disabling.
+Because each pair shares identical class structure and rule metadata, the model learns defensive programming constructs: parameterization, boundary checks, and feature disabling.
 
 Trained using LoRA (rank 16, alpha 32) on an Nvidia T4 accelerator in 195.6 seconds, the contrastive adapter delivers strong code-level discrimination:
 
-- On clean hunk ground truth (L3), within-rule AUC reaches 0.6594, with bootstrap share performing below random chance dropping to only 7.0 percent.
+- On clean hunk ground truth (L3), within-rule AUC reaches 0.6594, with bootstrap share performing below random chance dropping to 7.0 percent.
 - Code signal delta under paired rule-swap controls increases to +0.0839 on L0 and +0.1106 on L3.
 - When blended in equal proportion with targeted sink prompting, within-rule AUC remains balanced and strictly above 0.62 across all levels (0.6213 on L0, 0.6214 on L2, and 0.6280 on L3).
 
 ## 5. Comparative Evaluation
 
-Across the clean fix hunk evaluations (L1 and L3) and Vul4J, d1-3B demonstrates consistent superiority over larger dense transformers:
+Across the clean fix hunk evaluations (L1 and L3) and Vul4J, d1-3B outperforms larger dense transformers:
 
 | Benchmark Level | Heuristic Baseline | Kev-4B (4B Dense) | d1-3B Zero-Shot | d1-3B Targeted Prompt | d1-3B Contrastive LoRA |
 |---|---|---|---|---|---|
@@ -89,11 +89,11 @@ On within-rule code discrimination, targeted sink grounding and contrastive fine
 ## 6. Runtime Efficiency and Architecture Advantages
 
 Liquid AI's d1-3B relies on a hybrid architecture combining structured state-space models and feedforward layers.
-This design provides concrete systems advantages over standard transformer architectures:
+This design provides concrete advantages over standard transformer architectures:
 
-- Single-Pass Logit Extraction: Through its native System One API, d1-3B evaluates finding validity in a single forward pass over token logits, eliminating the latency of multi-token generation.
-- Memory Footprint: Peak VRAM allocation during inference on Nvidia T4 is 6.25 GiB in float16 precision, compared to 12.8 GiB required by Kev-4B.
-- Latency: Average decision latency is 12 to 14 milliseconds per finding on a single standard T4 instance, enabling real-time triage inside pre-commit hooks and CI runners.
+- d1-3B evaluates finding validity in a single forward pass over token logits, eliminating the latency of multi-token generation.
+- Peak VRAM allocation during inference on Nvidia T4 is 6.25 GiB in float16 precision, compared to 12.8 GiB required by Kev-4B.
+- Average decision latency is 12 to 14 milliseconds per finding on a single standard T4 instance, enabling real-time triage inside pre-commit hooks and CI runners.
 
 ## 7. Reproduction
 

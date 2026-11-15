@@ -19,7 +19,7 @@ configs:
     path: ghsa-scan-labeled.jsonl
 ---
 
-# TriageMate Java scan labels
+# d1-triage Java scan labels
 
 Java static-analysis alerts from Vul4J entries and GitHub advisory fix commits, with a binary TP/FP label.
 
@@ -62,13 +62,17 @@ The scan and label code is the same as Vul4J: changed Java files only, test sour
 | Kev-4B | 174 | 0.7521 | 0.6063 |
 
 d1 gains +0.1054 ROC-AUC but loses 0.0038 precision at 90% recall on the stored labels, so the gate fails there and d1 is not promoted.
-The heuristic has only two scores: 90% recall needs 77 positives, only 59 sit at 0.75, so the cut moves to 0.5 and accepts every row. Precision there is 85/174 = 0.4885, the heuristic's overall precision. Ties are accepted whole, so row order cannot change it.
+The heuristic has only two scores.
+90% recall needs 77 positives, only 59 sit at 0.75, so the cut moves to 0.5 and accepts every row.
+Precision there is 85/174 = 0.4885, the heuristic's overall precision.
+Ties are accepted whole, so row order cannot change it.
 An entry-level bootstrap puts the d1 AUC gain at -0.0952 to +0.3232 with P(delta <= 0) of 0.1855.
 
 Adding the cookbook's true/false `criteria` fixes that gate failure: AUC 0.7028 and P@90R 0.5132, both above the heuristic.
 The gain is rule-level calibration: weighted within-rule AUC is 0.474, still below 0.5.
 
-The verdict is label-dependent. Of the 85 stored positives, 44 sit on a changed hunk line and 41 sit only inside a touched method.
+The verdict is label-dependent.
+Of the 85 stored positives, 44 sit on a changed hunk line and 41 sit only inside a touched method.
 Under a hunk-only rule (44 TP), a CWE-consistent rule (53 TP), or both (28 TP), d1 passes the same gate, with AUC from 0.667 to 0.837.
 Only the strictest definition keeps d1's entry-bootstrap gain above zero.
 

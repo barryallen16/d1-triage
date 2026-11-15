@@ -11,7 +11,7 @@ import sys
 
 import numpy as np
 
-ROOT = Path(os.environ.get("TRIAGEMATE_ROOT", str(Path(__file__).resolve().parent.parent)))
+ROOT = Path(os.environ.get("D1_TRIAGE_ROOT", str(Path(__file__).resolve().parent.parent)))
 AUDIT = Path(os.environ.get("AUDIT_DIR", str(Path(__file__).resolve().parent)))
 
 
