@@ -27,3 +27,4 @@ include = ["d1_triage*", "triage*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
