@@ -59,7 +59,7 @@ All numbers below come directly from [audit/evaluate_d1.py](audit/evaluate_d1.py
 | **Kev-4B** | 4B Transformer | 0.7167 | 0.5100 | +0.0180 | 0.6667 | ~85 ms (fwd) / 12.8 GB VRAM |
 | **d1-3B Zero-Shot** | 3B Hybrid SSM | **0.8372** | 0.5495 | +0.0202 | **0.8000** | ~12 ms (fwd) / 6.2 GB VRAM |
 | **d1-3B Targeted Prompt** | 3B Hybrid SSM | 0.6261 | 0.5761 | +0.0749 | N/A | 626 ms avg (full loop) |
-| **d1-3B Contrastive LoRA** | 3B Hybrid SSM | 0.6079 | 0.5857 | +0.0365 | 0.6889 | ~379 ms avg (T4 loop) |
+| **d1-3B Contrastive LoRA** | 3B Hybrid SSM | 0.6520 | 0.6014 | +0.0396 | 0.7000 | ~414 ms avg (T4 loop) |
 
 *Definitions*:
 Verified Patch (L3) requires the finding line to sit inside a verified security fix hunk and match the advisory CVE CWE (28 of 174 rows).
@@ -77,9 +77,9 @@ In the GHSA set, `documentbuilderfactory-disallow-doctype-decl-missing` is 91% T
 Injecting `>>> [ALERT LINE X]` at the matched sink line forces code sensitivity, lifting L0 within-rule AUC from `0.4297` to `0.5986` and L0 swap delta to `+0.0749`, though overall L3 AUC drops to `0.6261`.
 
 Fine-tuning on synthetic Juliet cases collapsed real-world generalization (`0.449` within-rule AUC).
-Contrastive LoRA (`r=8`, `lr=3e-5`, sink-aligned) on 416 real pre- and post-fix git diff pairs lifted Vul4J AUC from `0.5444` to `0.6889` (`P@90R = 0.5556`, beating Heuristic `0.5778` and Kev-4B `0.6667`) and L2 within-rule AUC to `0.6452`, with `0.6079` L3 AUC and `0.5857` L3 within-rule AUC.
-Remaining gap: the 416 training rows are still short raw diff hunks rather than full enclosing methods, which limits L0/L1 generalization (`0.5090` / `0.5170`).
-With `P@90R = 0.1745` on L3, the model works as a triage ranker rather than an autonomous filter.
+Filtering out the 120 test-file rows from [audit/contrastive_train.jsonl](audit/contrastive_train.jsonl) (leaving 296 non-test rows) and training Contrastive LoRA (`r=8`, `lr=5e-5`, 2 epochs) with completion-only loss masking on `yes`/`no` plus `find_sink_line` grounding lifted Vul4J AUC from `0.5444` to `0.7000` (`P@90R = 0.5000`, beating Heuristic `0.5778` and Kev-4B `0.6667`), L3 AUC from `0.5988` to `0.6520` (`0.6014` within-rule AUC), and L2 within-rule AUC to `0.6310`.
+Remaining gap: the 296 non-test rows are still short raw diff hunks rather than full enclosing methods, which limits L0/L1 overall AUC (`0.5282` / `0.5390`).
+With `P@90R = 0.1971` on L3, the model works as a triage ranker rather than an autonomous filter.
 
 ---
 

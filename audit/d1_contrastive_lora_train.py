@@ -36,8 +36,8 @@ MERGED_DIR = WORK / "d1_lora_contrastive_merged"
 MAX_SEQ = 1536
 BATCH = 2
 GRAD_ACCUM = 4
-EPOCHS = 1
-LR = 3e-5
+EPOCHS = 2
+LR = 5e-5
 
 CWE_TO_SEMGREP_RULE = {
     "CWE-22": "java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal",
@@ -138,8 +138,7 @@ def main():
     from datasets import Dataset
     from huggingface_hub import snapshot_download
     from peft import LoraConfig, get_peft_model
-    from transformers import AutoModel, AutoModelForImageTextToText, AutoTokenizer
-    from trl import SFTConfig, SFTTrainer
+    from transformers import AutoModel, AutoModelForImageTextToText, AutoTokenizer, Trainer, TrainingArguments
 
     os.environ["WANDB_DISABLED"] = "true"
     os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
@@ -153,18 +152,26 @@ def main():
     q = as_question(QUESTIONS["tp"])
 
     print(f"2. Loading training rows from {TRAIN_DATA}...", flush=True)
-    train_rows = [json.loads(l) for l in open(TRAIN_DATA, encoding="utf-8") if l.strip()]
+    all_rows = [json.loads(l) for l in open(TRAIN_DATA, encoding="utf-8") if l.strip()]
+    train_rows = [r for r in all_rows if "/test/" not in r["file"].lower() and "test.java" not in r["file"].lower()]
     random.Random(3407).shuffle(train_rows)
-    print(f"Loaded {len(train_rows)} contrastive rows", flush=True)
+    print(f"Loaded {len(train_rows)} non-test contrastive rows (filtered {len(all_rows) - len(train_rows)} test rows)", flush=True)
 
     def fmt(row):
         state_text = state_of_annotated(row)
         prompt = render(tokenizer=tokenizer, state=state_text, q=q, bos=tokenizer.bos_token)
         target = "yes" if row["label"] == "TP" else "no"
-        return {"text": prompt + target + tokenizer.eos_token}
+        p_ids = tokenizer(prompt, add_special_tokens=False).input_ids
+        c_ids = tokenizer(target + tokenizer.eos_token, add_special_tokens=False).input_ids
+        max_p = MAX_SEQ - len(c_ids)
+        if len(p_ids) > max_p:
+            p_ids = p_ids[-max_p:]
+        input_ids = p_ids + c_ids
+        labels = [-100] * len(p_ids) + c_ids
+        return {"input_ids": input_ids, "attention_mask": [1] * len(input_ids), "labels": labels}
 
     dataset = Dataset.from_list([fmt(r) for r in train_rows])
-    print(f"Rendered {len(dataset)} training examples", flush=True)
+    print(f"Rendered {len(dataset)} completion-masked training examples", flush=True)
 
     print("3. Initializing base model with LoRA...", flush=True)
     base_model = AutoModelForImageTextToText.from_pretrained(
@@ -187,16 +194,13 @@ def main():
     peft_model = get_peft_model(base_model, lora_config)
     peft_model.print_trainable_parameters()
 
-    trainer = SFTTrainer(
+    trainer = Trainer(
         model=peft_model,
-        processing_class=tokenizer,
         train_dataset=dataset,
-        args=SFTConfig(
-            dataset_text_field="text",
-            max_length=MAX_SEQ,
+        args=TrainingArguments(
             per_device_train_batch_size=1,
             gradient_accumulation_steps=8,
-            warmup_steps=10,
+            warmup_steps=6,
             num_train_epochs=EPOCHS,
             learning_rate=LR,
             logging_steps=10,
@@ -207,6 +211,7 @@ def main():
             report_to="none",
             save_strategy="no",
             fp16=True,
+            remove_unused_columns=False,
         ),
     )
 
