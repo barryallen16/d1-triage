@@ -17,7 +17,13 @@ import sys
 import time
 from pathlib import Path
 
-from d1_triage.sink_finder import build_annotated_prompt, find_sink_line
+_BASE = Path(__file__).resolve().parent if "__file__" in globals() else Path("/content")
+sys.path.insert(0, str(_BASE))
+sys.path.insert(0, str(_BASE.parent))
+try:
+    from d1_triage.sink_finder import build_annotated_prompt, find_sink_line
+except ImportError:
+    from sink_finder import build_annotated_prompt, find_sink_line
 
 MODEL = "LiquidAI/d1-3B"
 WORK = Path("/content" if Path("/content").exists() else "/tmp")
@@ -31,7 +37,20 @@ MAX_SEQ = 1536
 BATCH = 2
 GRAD_ACCUM = 4
 EPOCHS = 1
-LR = 1e-4
+LR = 3e-5
+
+CWE_TO_SEMGREP_RULE = {
+    "CWE-22": "java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal",
+    "CWE-74": "java.lang.security.audit.el-injection.el-injection",
+    "CWE-77": "java.lang.security.audit.command-injection.command-injection",
+    "CWE-78": "java.lang.security.audit.command-injection.command-injection",
+    "CWE-79": "java.lang.security.audit.xss.no-direct-response-writer.no-direct-response-writer",
+    "CWE-89": "java.lang.security.audit.formatted-sql-string.formatted-sql-string",
+    "CWE-94": "java.lang.security.audit.script-engine-injection.script-engine-injection",
+    "CWE-502": "java.lang.security.audit.object-deserialization.object-deserialization",
+    "CWE-611": "java.lang.security.audit.xxe.documentbuilderfactory-disallow-doctype-decl-missing.documentbuilderfactory-disallow-doctype-decl-missing",
+    "CWE-918": "java.lang.security.audit.ssrf.ssrf",
+}
 
 QUESTION = (
     "Is this static-analysis warning a real, exploitable security bug at the flagged sink (marked with >>>) in the code below? "
@@ -46,11 +65,18 @@ QUESTIONS = {"tp": {"type": "noul", "instructions": QUESTION, "criteria": CRITER
 
 def state_of_annotated(row, window_override=None):
     window = (window_override if window_override is not None else row.get("code_window", ""))[:8000]
+    rule = row["rule"]
+    if rule.endswith(".vulnerability"):
+        rule = CWE_TO_SEMGREP_RULE.get(row.get("cwe", ""), rule)
+    line_no = row.get("line", 0)
+    if not line_no:
+        sink_idx, _ = find_sink_line(window, rule)
+        line_no = sink_idx + 1
     return build_annotated_prompt(
         code_window=window,
-        rule=row["rule"],
+        rule=rule,
         cwe=row["cwe"],
-        line_no=row.get("line", 0),
+        line_no=line_no,
         file_path=str(row["file"]),
         message=row.get("message", ""),
     )
@@ -151,8 +177,8 @@ def main():
     base_model.gradient_checkpointing_enable()
 
     lora_config = LoraConfig(
-        r=16,
-        lora_alpha=32,
+        r=8,
+        lora_alpha=16,
         target_modules=r".*language_model.*\.(q_proj|k_proj|v_proj|out_proj)",
         lora_dropout=0.05,
         bias="none",

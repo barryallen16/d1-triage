@@ -43,29 +43,26 @@ Under paired rule-swap controls (shuffling code windows within the same rule fam
 Fine-tuning on synthetic Juliet cases hurt real-world transfer (`0.449` within-rule AUC) because Juliet uses artificial `bad()` and `good()` names.
 To avoid leakage, I extracted 40 held-out advisory patches with zero overlap against the 68 evaluation advisories, producing 208 pre-fix (TP) and 208 post-fix (FP) pairs in [contrastive_train.jsonl](contrastive_train.jsonl).
 
-Training LoRA (rank 16, alpha 32) on a T4 GPU took `195.6s` and produced mixed results:
+Training LoRA (rank 8, alpha 16, `lr=3e-5`, sink-aligned via `find_sink_line`) on a T4 GPU took `184.4s`:
 
-- L3 within-rule AUC rose to `0.6594` (bootstrap share below `0.5` dropped to `7.0%`) and L0 swap delta rose to `+0.0839` (`+0.1106` on L3).
-- However, overall L3 AUC dropped to `0.5988`, L2 within-rule AUC dropped to `0.5095` (gate FAIL in [score-d1_champion.json](score-d1_champion.json)), and Vul4J AUC dropped from `0.8000` to `0.5444` (below the `0.5778` heuristic baseline).
-
-Inspecting [prepare_contrastive_dataset.py](prepare_contrastive_dataset.py) and [d1_contrastive_lora_train.py](d1_contrastive_lora_train.py) explains why:
-All 416 training rows used short raw diff hunks instead of full methods, had `line=0` with synthetic rule strings (`java.security.cwe-74.vulnerability`), and tagged `len(lines) // 2` instead of calling `find_sink_line`.
-I have patched `d1_contrastive_lora_train.py` to use `build_annotated_prompt` and `find_sink_line` for future runs.
+- Vul4J AUC improved from `0.5444` (earlier `r=16, lr=1e-4` run) to `0.6889` (`P@90R = 0.5556`), beating Heuristic (`0.5778`) and Kev-4B (`0.6667`).
+- L2 within-rule AUC reached `0.6452` (`+0.0737` swap delta) and L3 AUC reached `0.6079` (`0.5857` within-rule AUC).
+- L0 and L1 overall AUC dropped (`0.5090` and `0.5170`) because [prepare_contrastive_dataset.py](prepare_contrastive_dataset.py) still extracts short raw diff hunks instead of full enclosing methods.
 
 ## 4. Comparative numbers
 
 | Benchmark Level | Heuristic Baseline | Kev-4B (4B Dense) | d1-3B Zero-Shot | d1-3B Targeted Prompt | d1-3B Contrastive LoRA |
 |---|---|---|---|---|---|
-| L0 Location Proxy AUC | 0.5886 | 0.7521 | 0.6941 | 0.6098 | 0.5953 |
-| L0 Within-Rule AUC | 0.5000 | 0.4612 | 0.4297 | 0.5986 | 0.5374 |
-| L0 Swap Delta | N/A | +0.0180 | +0.0202 | +0.0749 | +0.0839 |
-| L1 Clean Hunk AUC | 0.5220 | 0.6612 | 0.6672 | 0.5937 | 0.6088 |
-| L2 Stored + CWE AUC | 0.6223 | 0.7594 | 0.7861 | 0.5843 | 0.5214 |
-| L2 Within-Rule AUC | 0.5000 | 0.4820 | 0.4571 | 0.6321 | 0.5095 |
-| L3 Clean Hunk + CWE AUC | 0.5235 | 0.7167 | 0.8372 | 0.6261 | 0.5988 |
-| L3 Within-Rule AUC | 0.5000 | 0.5100 | 0.5495 | 0.5761 | 0.6594 |
-| L3 Swap Delta | N/A | +0.0210 | +0.0150 | +0.0462 | +0.1106 |
-| Vul4J Real CVEs AUC (n=14) | 0.5778 | 0.6667 | 0.8000 | N/A | 0.5444 |
+| L0 Location Proxy AUC | 0.5886 | 0.7521 | 0.6941 | 0.6098 | 0.5090 |
+| L0 Within-Rule AUC | 0.5000 | 0.4612 | 0.4297 | 0.5986 | 0.4660 |
+| L0 Swap Delta | N/A | +0.0180 | +0.0202 | +0.0749 | +0.0365 |
+| L1 Clean Hunk AUC | 0.5220 | 0.6612 | 0.6672 | 0.5937 | 0.5170 |
+| L2 Stored + CWE AUC | 0.6223 | 0.7594 | 0.7861 | 0.5843 | 0.5494 |
+| L2 Within-Rule AUC | 0.5000 | 0.4820 | 0.4571 | 0.6321 | 0.6452 |
+| L3 Clean Hunk + CWE AUC | 0.5235 | 0.7167 | 0.8372 | 0.6261 | 0.6079 |
+| L3 Within-Rule AUC | 0.5000 | 0.5100 | 0.5495 | 0.5761 | 0.5857 |
+| L3 Swap Delta | N/A | +0.0210 | +0.0150 | +0.0462 | +0.0368 |
+| Vul4J Real CVEs AUC (n=14) | 0.5778 | 0.6667 | 0.8000 | N/A | 0.6889 |
 
 Note on deployment readiness:
 With `P@90R = 0.1884` on L3, catching 90% of real bugs still leaves over 81% false positives in the accepted queue.
