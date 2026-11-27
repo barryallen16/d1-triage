@@ -17,6 +17,8 @@ import sys
 import time
 from pathlib import Path
 
+from d1_triage.sink_finder import build_annotated_prompt, find_sink_line
+
 MODEL = "LiquidAI/d1-3B"
 WORK = Path("/content" if Path("/content").exists() else "/tmp")
 TRAIN_DATA = WORK / "contrastive_train.jsonl"
@@ -44,26 +46,14 @@ QUESTIONS = {"tp": {"type": "noul", "instructions": QUESTION, "criteria": CRITER
 
 def state_of_annotated(row, window_override=None):
     window = (window_override if window_override is not None else row.get("code_window", ""))[:8000]
-    lines = window.splitlines()
-    flagged_idx = len(lines) // 2
-    annotated = []
-    for idx, l in enumerate(lines):
-        if idx == flagged_idx:
-            annotated.append(f">>> [ALERT LINE {row.get('line', 0)}]: {l}")
-        else:
-            annotated.append(f"    {l}")
-    body = "\n".join(annotated)
-
-    header = [
-        f"Rule: {row['rule']}",
-        f"CWE: {row['cwe']}",
-        f"Severity: {row.get('severity', 'WARNING')}",
-        f"File: {str(row['file']).split('/')[-1]}",
-        f"Flagged Line: {row.get('line', 0)}",
-    ]
-    if row.get("message"):
-        header.append(f"Rule message: {row['message']}")
-    return "\n".join(header) + f"\n\nJava (Flagged sink marked with >>>):\n```java\n{body}\n```"
+    return build_annotated_prompt(
+        code_window=window,
+        rule=row["rule"],
+        cwe=row["cwe"],
+        line_no=row.get("line", 0),
+        file_path=str(row["file"]),
+        message=row.get("message", ""),
+    )
 
 
 def build_rule_swap(rows, seed=3407):

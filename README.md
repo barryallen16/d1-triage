@@ -11,87 +11,91 @@
 
 # d1-triage: Static Analysis Alert Triage with Liquid AI d1-3B
 
-Static analysis scanners flag security bugs with high recall, but false-positive rates exceed 70%.
-d1-triage uses Liquid AI's hybrid d1-3B to rank alerts by exploitability in under 15 ms, letting developers review real vulnerabilities first.
+Static analysis scanners flag Java security patterns with high recall, but false positives often exceed 70%.
+`d1-triage` benchmarks Liquid AI's hybrid `d1-3B` model on ranking Semgrep alerts by exploitability, and ships a local CLI with an AST heuristic mode for fast dry runs.
 
 ---
 
 ## Quickstart
 
-Install with uv (recommended):
+Install with `uv` (recommended):
 
 ```bash
 uv tool install git+https://github.com/barryallen16/d1-triage.git
 ```
 
-Or with pip:
+Or with `pip`:
 
 ```bash
 pip install git+https://github.com/barryallen16/d1-triage.git
 ```
 
-Run the standalone CLI locally on standard CPU:
+Run the CLI locally in heuristic mock mode (`--mock`, no model download required):
 
 ```bash
 # 1. Interactive demo: path traversal vs guarded XML parser
-d1-triage --demo
+d1-triage --demo --mock
 
 # 2. Triage a Semgrep report and export prioritized JSON
-d1-triage --scan semgrep-findings.json --output triage-report.json
+d1-triage --scan semgrep-findings.json --mock --output triage-report.json
 
 # 3. Sample 5 benchmark alerts
-d1-triage --benchmark ghsa --limit 5
+d1-triage --benchmark ghsa --limit 5 --mock
 ```
 
-Add `--mock` to any command for a dry run without downloading model weights.
+Note: The local CLI and GitHub Pages playground use the AST heuristic baseline (`--mock`) for instant feedback.
+Real `d1-3B` logit scoring runs via the Hugging Face model/training scripts in `audit/`.
 
 ---
 
 ## Benchmark leaderboard
 
-Evaluated on 174 real-world Java alerts from 68 GitHub advisories (GHSA) and all 126 Vul4J benchmark repositories.
+Evaluated on 174 real-world Java alerts across 68 GitHub advisories (GHSA) and 14 alerts across 126 Vul4J benchmark repositories (5 TP, 9 FP).
+All numbers below come directly from [audit/evaluate_d1.py](audit/evaluate_d1.py), [audit/compare_all_phases.py](audit/compare_all_phases.py), and [audit/score-d1_champion.json](audit/score-d1_champion.json).
 
-| Model / Configuration | Architecture | Verified Patch AUC | Same-Rule AUC | Rule-Swap Delta | Vul4J Real CVEs | Latency / Hardware |
+| Model / Configuration | Architecture | Verified Patch AUC (L3) | Same-Rule AUC (L3) | L0 Swap Delta | Vul4J AUC (n=14) | End-to-End Latency (T4) |
 |---|---|---|---|---|---|---|
 | **Semgrep Baseline** | Scanner rules | 0.5235 | 0.5000 | N/A | 0.5778 | <1 ms (CPU) |
-| **Kev-4B** | 4B Transformer | 0.7167 | 0.5100 | +0.0180 | 0.6667 | ~85 ms / 12.8 GB VRAM |
-| **d1-3B Base Model** | 3B Hybrid SSM | **0.8372** | 0.5495 | +0.0202 | **0.8000** | 12 ms / 6.2 GB VRAM |
-| **d1-3B Targeted Prompt** | 3B Hybrid SSM | 0.6261 | 0.5761 | +0.0749 | **0.8000** | 12 ms / 6.2 GB VRAM |
-| **d1-3B Contrastive LoRA** | 3B Hybrid SSM | 0.5988 | **0.6594** | **+0.0839** | 0.5444 | 14 ms / 6.3 GB VRAM |
-| **d1-3B 50/50 Ensemble** | 3B Hybrid SSM | 0.6125 | **0.6280** | +0.0794 | **0.8000** | 25 ms / 6.3 GB VRAM |
+| **Kev-4B** | 4B Transformer | 0.7167 | 0.5100 | +0.0180 | 0.6667 | ~85 ms (fwd) / 12.8 GB VRAM |
+| **d1-3B Zero-Shot** | 3B Hybrid SSM | **0.8372** | 0.5495 | +0.0202 | **0.8000** | ~12 ms (fwd) / 6.2 GB VRAM |
+| **d1-3B Targeted Prompt** | 3B Hybrid SSM | 0.6261 | 0.5761 | +0.0749 | N/A | 626 ms avg (full loop) |
+| **d1-3B Contrastive LoRA** | 3B Hybrid SSM | 0.5988 | **0.6594** | **+0.0839** | 0.5444 | 484 ms avg (full loop) |
 
-*Definitions*: Verified patch marks finding lines inside verified security fix hunks that match the advisory CVE type.
-Same-rule AUC measures discrimination among alerts from the same rule family.
-Swap delta measures the drop in AUC when swapping code behind identical rules.
-The four verification filters are detailed in [audit/TECHNICAL_REPORT.md](audit/TECHNICAL_REPORT.md).
-
----
-
-## Core findings
-
-Scanners report 1-based file lines, but models receive unnumbered method snippets.
-Injecting `>>> [ALERT LINE X]` anchors the attention on the flagged statement, lifting within-rule AUC from 0.4297 to 0.5986.
-
-Training on synthetic Juliet test cases degraded real-world transfer.
-Fine-tuning on 416 real pre- and post-fix commit diffs achieved 0.6594 within-rule AUC on verified fix hunks.
-
-On verified fix hunks, d1-3B scores 0.8372 AUC compared to Kev-4B's 0.7167.
-It runs in 12 to 14 ms on an Nvidia T4 using 6.2 GiB VRAM versus Kev-4B's 12.8 GiB.
+*Definitions*:
+Verified Patch (L3) requires the finding line to sit inside a verified security fix hunk and match the advisory CVE CWE (28 of 174 rows).
+Same-Rule AUC measures ranking discrimination among alerts sharing the same Semgrep rule.
+Swap Delta measures the AUC drop when code windows are shuffled behind identical rules.
+The four verification filters (L0 to L3) are detailed in [audit/TECHNICAL_REPORT.md](audit/TECHNICAL_REPORT.md).
 
 ---
 
-## One-command reproduction
+## Key findings
 
-Calculate all metrics on CPU in under 0.2 seconds:
+Zero-shot `d1-3B` reaches `0.8372` L3 AUC mostly by exploiting rule-name priors rather than reading code.
+In the GHSA set, `documentbuilderfactory-disallow-doctype-decl-missing` is 91% TP (32/35) while `formatted-sql-string` is 4% TP (1/26), so zero-shot scores `0.4297` within-rule AUC on L0 and barely moves (`+0.0202`) when code windows are swapped.
+
+Injecting `>>> [ALERT LINE X]` at the matched sink line forces code sensitivity, lifting L0 within-rule AUC from `0.4297` to `0.5986` and L0 swap delta to `+0.0749`, though overall L3 AUC drops to `0.6261`.
+
+Fine-tuning on synthetic Juliet cases collapsed real-world generalization (`0.449` within-rule AUC).
+Contrastive LoRA on 416 real pre- and post-fix git diff pairs lifted L3 within-rule AUC to `0.6594` and L0 swap delta to `+0.0839`, but dropped overall L3 AUC to `0.5988` and Vul4J AUC to `0.5444`.
+Root cause: the training script marked the middle line of short diff hunks with `line=0` and synthetic rule strings instead of `find_sink_line` on full methods.
+With `P@90R = 0.1884` on L3, the model works as a triage ranker rather than an autonomous filter.
+
+---
+
+## Reproduction
+
+Calculate GHSA (Targeted Prompt, Contrastive LoRA) and Vul4J metrics on CPU in under 0.2 seconds:
 
 ```bash
-python audit/evaluate_d1.py
+uv run python audit/evaluate_d1.py
 ```
 
-Run the 19-test verification suite:
+Run the 19-test audit verification suite and 51-test unit suite:
 
 ```bash
-python audit/test_whole_suite.py
+uv run python audit/test_whole_suite.py
+uv run python -m pytest -q
 ```
 
 ---
@@ -102,5 +106,5 @@ python audit/test_whole_suite.py
 |---|---|---|---|
 | **Model Weights** | Hugging Face | [`barryallen16/d1-3B-java-vuln-triage`](https://huggingface.co/barryallen16/d1-3B-java-vuln-triage) | Fine-tuned Liquid AI d1-3B Q8_0 weights (2.87 GB) |
 | **Benchmark Dataset** | Hugging Face | [`barryallen16/d1-triage`](https://huggingface.co/datasets/barryallen16/d1-triage) | 174 real-world Java alerts across GHSA & Vul4J census |
-| **Interactive Demo** | GitHub Pages | [`barryallen16.github.io/d1-triage`](https://barryallen16.github.io/d1-triage/) | In-browser triage pipeline playground with AST grounding |
-| **Technical Report** | Audit & Proofs | [`audit/TECHNICAL_REPORT.md`](audit/TECHNICAL_REPORT.md) | Empirical proofs, rule priors, and confidence bounds |
+| **Interactive Demo** | GitHub Pages | [`barryallen16.github.io/d1-triage`](https://barryallen16.github.io/d1-triage/) | Client-side heuristic playground with sink grounding |
+| **Technical Report** | Audit & Notes | [`audit/TECHNICAL_REPORT.md`](audit/TECHNICAL_REPORT.md) | Methodology, rule priors, and failure analysis |

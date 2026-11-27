@@ -1,54 +1,47 @@
 # Run d1-triage locally
 
-This guide covers running the d1-triage developer tool on CPU or GPU, and running the legacy scoring pipeline.
+This guide covers running the `d1-triage` CLI in heuristic mock mode and running the `triage` QLoRA/heuristic scoring module.
 
-## 1. Local run with d1-3B
+## 1. Local CLI (AST heuristic mode)
 
-The main triage tool uses Liquid AI's d1-3B foundation model to score static analysis findings.
+Set up the environment with `uv`:
 
 ```bash
-# Set up environment
 uv sync
+```
 
-# Run interactive demo with mock engine (no model download required)
+Run the interactive demo, a Semgrep scan report, or benchmark samples using `--mock`:
+
+```bash
+# Run interactive demo with AST heuristic engine
 uv run python d1_triage.py --demo --mock
 
 # Triage a Semgrep JSON scan report
-uv run python d1_triage.py --scan semgrep-findings.json --output triage-report.json
+uv run python d1_triage.py --scan semgrep-findings.json --mock --output triage-report.json
 
 # Sample real alerts from benchmark sets
 uv run python d1_triage.py --benchmark ghsa --limit 5 --mock
 uv run python d1_triage.py --benchmark vul4j --limit 5 --mock
 ```
 
-Install the `model` dependency group when running live model inference with PyTorch:
-
-```bash
-uv sync --extra model
-uv run python d1_triage.py --scan semgrep-findings.json
-```
+Passing `mock=False` (omitting `--mock`) raises a `RuntimeError` because the standalone CLI does not bundle `LiquidAI/d1-3B` weights.
 
 ## 2. Docker container
 
-Build and run in a container with Java 17 and Semgrep pre-installed:
+Build and run in a container:
 
 ```bash
-# Build image
 docker build -t d1-triage .
-
-# Run demo
 docker run --rm d1-triage --demo --mock
-
-# Scan a local project directory mounted into the container
-docker run --rm -v $(pwd)/my-project:/src d1-triage --scan /src/findings.json
+docker run --rm -v $(pwd)/my-project:/src d1-triage --scan /src/findings.json --mock
 ```
 
-## 3. Heuristic baseline pipeline
+## 3. Scoring module (`triage.cli`)
 
-The heuristic and baseline pipeline remains available via `python -m triage.cli`:
+The `triage` package supports both the heuristic baseline and QLoRA logit scoring (`Qwen/Qwen3.5-4B` via `unsloth`):
 
 ```bash
-# Heuristic ranking (no model required)
+# Heuristic ranking (no GPU required)
 uv run python -m triage.cli path/to/java/project --scorer heuristic --json
 
 # QLoRA model (requires CUDA and model extras)

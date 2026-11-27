@@ -149,18 +149,18 @@ class D1TriageEngine:
         return self._device
 
     def triage_one(self, finding: TriageFinding, threshold: float = 0.5) -> TriageResult:
-        """Triage a single finding through d1-3B with statement-level sink grounding."""
+        """Triage a single finding with statement-level sink grounding."""
         _sink_idx, sink_stmt = find_sink_line(finding.code_window, finding.rule)
 
-        t0 = time.time()
-        if "DEMO-TP" in finding.id or (finding.ground_truth and "TP" in finding.ground_truth):
-            p_tp = 0.968
-        elif "DEMO-FP" in finding.id or (finding.ground_truth and "FP" in finding.ground_truth):
-            p_tp = 0.032
-        else:
-            p_tp = evaluate_ast_heuristics(finding.code_window, finding.rule, finding.cwe)
-        elapsed_ms = (time.time() - t0) * 1000.0
-        elapsed_ms = max(elapsed_ms, 10.6)
+        if not self.mock:
+            raise RuntimeError(
+                f"Live inference for {self.model_name} is not wired in this Space app. "
+                "Pass --mock (mock=True) to run the AST heuristic baseline."
+            )
+
+        t0 = time.perf_counter()
+        p_tp = evaluate_ast_heuristics(finding.code_window, finding.rule, finding.cwe)
+        elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
         is_tp = p_tp >= threshold
         decision = "TRUE POSITIVE" if is_tp else "FALSE POSITIVE"

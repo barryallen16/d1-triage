@@ -66,6 +66,21 @@ def test_engine_mock_triage_one():
     assert result.latency_ms >= 0.0
 
 
+def test_engine_non_mock_fails_loudly():
+    import pytest
+    engine = D1TriageEngine(mock=False)
+    finding = TriageFinding(
+        id="TEST-02",
+        rule="java.lang.security.audit.path-traversal",
+        cwe="CWE-22",
+        file_path="src/App.java",
+        line_number=42,
+        code_window="File f = new File(baseDir, userInput);",
+    )
+    with pytest.raises(RuntimeError, match="mock=True"):
+        engine.triage_one(finding)
+
+
 def test_engine_mock_triage_batch():
     engine = D1TriageEngine(mock=True)
     findings = [

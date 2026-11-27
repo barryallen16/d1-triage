@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
   <title>d1-triage - Real-World Java Static Analysis Alert Triage</title>
-  <meta name="description" content="Automate Semgrep SAST alert triage in Java using Liquid AI d1-3B. Zero data leakage, 83.7% hunk accuracy, and 12ms inference latency.">
+  <meta name="description" content="Benchmarking Semgrep SAST alert triage in Java using Liquid AI d1-3B. Zero data leakage, 0.837 L3 ROC-AUC, and 12ms T4 forward pass.">
   <link rel="icon" type="image/svg+xml" href="d1.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2459,6 +2459,14 @@
         padding: 8px 10px;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2494,17 +2502,17 @@
   
   <section class="hero">
     <div class="container">
-      <h1>Cut noisy Java security alerts by 60%.<br>Keep only the real vulnerabilities.</h1>
+      <h1>Rank Java Semgrep alerts<br>before you triage them.</h1>
       <p class="lead">
-        Static analysis tools flood engineers with hundreds of false alarms. d1-triage combines statement-level AST grounding and Liquid AI d1-3B to verify whether an alert is truly exploitable in 10.6ms on CPU with zero data leakage.
+        Static analysis scanners flag real bugs alongside 70%+ false positives. d1-triage benchmarks Liquid AI d1-3B with statement-level sink grounding on 174 GHSA and 14 Vul4J alerts to surface real vulnerabilities first.
       </p>
       <p class="hero-target-audience">
-        Built for AppSec teams and Java engineers tired of sorting through false alarms in PRs and CI pipelines.
+        Built for Java engineers and AppSec teams sorting through noisy Semgrep findings in PRs and CI.
       </p>
 
       <div class="hero-actions">
         <a href="#playground" class="nav-cta hero-btn-primary">
-          <span>Explore Real-Time Pipeline &darr;</span>
+          <span>Try Interactive Demo &darr;</span>
         </a>
         <div class="command-box">
           <div class="pkg-tabs" role="tablist" aria-label="Package manager selection">
@@ -2517,29 +2525,25 @@
             <span>Copy</span>
           </button>
         </div>
-        <a href="https://github.com/barryallen16/d1-triage" target="_blank" rel="noreferrer" class="hero-github-btn">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="#fbbf24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span>Star on GitHub</span>
-        </a>
       </div>
 
       
       <div class="hero-stats">
         <div class="stat-item">
-          <div class="stat-value highlight">64.3%</div>
-          <div class="stat-label">False alarm suppression on 126-repo Vul4J benchmark</div>
+          <div class="stat-value highlight">0.8372</div>
+          <div class="stat-label">Verified Patch L3 ROC-AUC (d1-3B zero-shot)</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value">0 Missed</div>
-          <div class="stat-label">Zero dropped vulnerabilities across 68 real CVEs (100% recall)</div>
+          <div class="stat-value">0.6594</div>
+          <div class="stat-label">Same-rule L3 ROC-AUC (Contrastive LoRA)</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value">10.6 ms</div>
-          <div class="stat-label">Single-pass CPU inference latency (no GPU required)</div>
+          <div class="stat-value">~12 ms</div>
+          <div class="stat-label">Single-pass T4 forward pass (~484 ms end-to-end)</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value">2.8 GB</div>
-          <div class="stat-label">Minimal RAM footprint via Q8_0 state-space model</div>
+          <div class="stat-value">2.87 GB</div>
+          <div class="stat-label">Q8_0 GGUF model weights on Hugging Face</div>
         </div>
       </div>
     </div>
@@ -2550,9 +2554,9 @@
     <span id="workflow" style="position:relative; top:-80px; display:block;"></span>
     <div class="container">
       <div class="section-head" style="margin-bottom: 20px;">
-        <h2 class="section-title">The Real-Time Triage Pipeline</h2>
+        <h2 class="section-title">Interactive Triage Preview (Client-Side AST Heuristics)</h2>
         <p class="section-desc" style="max-width: 820px; margin-bottom: 0;">
-          Select a finding or edit the code snippet below to evaluate how findings route through sink grounding, AST invariant checks, and triage dispatch. For production CI/CD or local CLI triage, install the CLI from GitHub.
+          Pick a preset or edit the Java snippet to see sink grounding and guard checks run in your browser. This web preview uses lightweight AST heuristics; run the scripts in <code>audit/</code> for d1-3B logit scoring.
         </p>
       </div>
 
@@ -2627,9 +2631,9 @@
           <div class="pipeline-station-pill" id="pst-3" onclick="switchPipelineStation(3)">
             <div class="pipeline-station-top">
               <span class="pipeline-station-num">STATION 03</span>
-              <span class="pipeline-station-timing">10.6ms</span>
+              <span class="pipeline-station-timing">&lt;1ms (JS)</span>
             </div>
-            <div class="pipeline-station-name">3. d1-3B Model Inference</div>
+            <div class="pipeline-station-name">3. Heuristic / Model Score</div>
           </div>
 
           <div class="pipeline-station-pill" id="pst-4" onclick="switchPipelineStation(4)">
@@ -2722,9 +2726,9 @@
   <section class="section" id="benchmark">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">Benchmark Leaderboard: Real-World Triage Accuracy</h2>
+        <h2 class="section-title">Benchmark Leaderboard: Real-World Triage</h2>
         <p class="section-desc">
-          Static analysis benchmarks are often crowded with academic proxies. We evaluate d1-triage on 174 real-world Java alerts across 68 GitHub advisories and the complete 126-repository Vul4J enterprise census. Every metric is tested with paired controls to prevent models from cheating via rule name memorization.
+          Evaluated on 174 real-world Java alerts across 68 GitHub advisories and 14 alerts across 126 Vul4J repositories. Every metric is tested with paired rule-swap controls to catch models cheating via rule-name priors.
         </p>
       </div>
 
@@ -2732,13 +2736,13 @@
       <div class="bench-kpi-grid">
         <div class="bench-kpi-card">
           <div class="bench-kpi-top">
-            <h3 class="bench-kpi-title">Noise Reduction</h3>
-            <span class="bench-kpi-badge bench-badge-success">0 Dropped CVEs</span>
+            <h3 class="bench-kpi-title">Vul4J Zero-Shot</h3>
+            <span class="bench-kpi-badge bench-badge-success">126 Repos (n=14)</span>
           </div>
           <div class="bench-kpi-body">
-            <div class="bench-kpi-value">64.3%</div>
-            <div class="bench-kpi-label">False Positive Suppression</div>
-            <div class="bench-kpi-subtext">Eliminates 9 of 14 noisy scanner alerts on the 126-repo Vul4J census with 100% recall on true exploits.</div>
+            <div class="bench-kpi-value">0.8000</div>
+            <div class="bench-kpi-label">Vul4J ROC-AUC (5 TP / 9 FP)</div>
+            <div class="bench-kpi-subtext">Zero-shot d1-3B beats Kev-4B (0.6667) and the Semgrep heuristic (0.5778) on Vul4J.</div>
           </div>
         </div>
 
@@ -2749,7 +2753,7 @@
           </div>
           <div class="bench-kpi-body">
             <div class="bench-kpi-value">0.6594</div>
-            <div class="bench-kpi-label">Same-Rule Accuracy (AUC)</div>
+            <div class="bench-kpi-label">Same-Rule Ranking (ROC-AUC)</div>
             <div class="bench-kpi-subtext">Separates vulnerable functions from patched commits under identical AST rules (vs 0.5000 scanner coin-flip).</div>
           </div>
         </div>
@@ -2757,12 +2761,12 @@
         <div class="bench-kpi-card">
           <div class="bench-kpi-top">
             <h3 class="bench-kpi-title">Inference Speed</h3>
-            <span class="bench-kpi-badge bench-badge-success">140x Faster Than 70B</span>
+            <span class="bench-kpi-badge bench-badge-success">Single-Pass Logits</span>
           </div>
           <div class="bench-kpi-body">
-            <div class="bench-kpi-value">10.6 ms</div>
-            <div class="bench-kpi-label">Decision Latency (CPU)</div>
-            <div class="bench-kpi-subtext">Single forward-pass evaluation on standard commodity CPU. Zero token decode wait time.</div>
+            <div class="bench-kpi-value">~12 ms</div>
+            <div class="bench-kpi-label">Forward Pass (T4 GPU)</div>
+            <div class="bench-kpi-subtext">Single forward-pass logit readout on Nvidia T4 (~484 ms end-to-end per finding in Python loop).</div>
           </div>
         </div>
 
@@ -2807,9 +2811,8 @@
             <h3 style="font-size:1.1rem; font-weight:700; margin:0 0 6px 0; color:var(--text);">Vul4J Enterprise Benchmark</h3>
           </div>
           <p>
-            Evaluated across 126 Apache and enterprise Java repositories (Camel, HBase, PDFBox, OpenEJB).
-            Instead of synthetic test cases, this benchmark tests multi-rule scanner findings on production code.
-            d1-triage eliminates 64.3% of noise with zero dropped CVEs.
+            Evaluated across 126 Apache and enterprise Java repositories (14 Semgrep alerts: 5 TP, 9 FP across 10 CVEs).
+            Zero-shot d1-3B scores 0.8000 AUC, while Contrastive LoRA drops to 0.5444 due to hunk-training mismatch.
           </p>
         </div>
       </div>
@@ -2833,12 +2836,12 @@
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>d1-triage (Liquid AI d1-3B Q8)</strong>
-                <span class="badge-win">Edge CPU</span>
+                <strong>d1-triage (Liquid AI d1-3B)</strong>
+                <span class="badge-win">T4 Forward Pass</span>
               </span>
               <div class="comparison-val-wrap">
-                <span class="comparison-val">10.6 ms</span>
-                <span class="comparison-delta comp-delta-good">100% Speed Rating (Instant)</span>
+                <span class="comparison-val">~12 ms</span>
+                <span class="comparison-delta comp-delta-good">Single-Pass Logit Readout</span>
               </div>
             </div>
             <div class="comp-bar-track">
@@ -3111,11 +3114,11 @@
                     <strong>Liquid AI d1-3B Targeted Prompt</strong>
                     <div class="t-muted" style="font-size: 0.78rem;">Statement Sink Anchored (&gt;&gt;&gt;)</div>
                   </td>
-                  <td><span class="badge-win">0.8000</span></td>
+                  <td>N/A</td>
                   <td>0.6261</td>
                   <td>0.5761</td>
                   <td>+0.0749</td>
-                  <td>12 ms / 6.2 GB VRAM</td>
+                  <td>626 ms avg (full loop)</td>
                 </tr>
                 <tr class="highlight-row">
                   <td>
@@ -3126,18 +3129,18 @@
                   <td>0.5988</td>
                   <td><span class="badge-champion">0.6594</span></td>
                   <td><span class="badge-champion">+0.1106</span></td>
-                  <td>14 ms / 6.3 GB VRAM</td>
+                  <td>484 ms avg (full loop)</td>
                 </tr>
                 <tr class="highlight-row" style="background: rgba(16, 185, 129, 0.08);">
                   <td>
-                    <strong>Liquid AI d1-3B Ensemble (Production Q8)</strong>
-                    <div class="t-muted" style="font-size: 0.78rem;">Zero-Shot + Contrastive on CPU GGUF</div>
+                    <strong>Liquid AI d1-3B 50/50 Ensemble</strong>
+                    <div class="t-muted" style="font-size: 0.78rem;">Targeted Prompt + Contrastive LoRA</div>
                   </td>
-                  <td><span class="badge-win">0.8000</span></td>
+                  <td>N/A</td>
                   <td>0.6125</td>
                   <td><span class="badge-win">0.6280</span></td>
                   <td>+0.0794</td>
-                  <td><strong style="color: #34d399;">10.6 ms (CPU)</strong></td>
+                  <td>~1.1 s (2-model loop)</td>
                 </tr>
               </tbody>
             </table>
@@ -3360,14 +3363,14 @@
                   <td>174</td>
                   <td>28 TP (16.1%)</td>
                   <td>0.5235</td>
-                  <td><strong style="color: #93c5fd;">0.8372</strong></td>
-                  <td><strong style="color: #34d399;">+0.1106</strong></td>
+                  <td><strong style="color: #93c5fd;">0.8372 (Base)</strong></td>
+                  <td><strong style="color: #34d399;">+0.1106 (LoRA)</strong></td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="comp-note" style="margin: 16px 20px 20px;">
-            <strong>Why Rule-Swap Verification is mandatory:</strong> In static analysis triage research, models frequently cheat by latching onto rule names (e.g. predicting every alert named java.sql.sqli is a True Positive). To detect this, our audit deranges code windows behind identical rules. If a model predicts from rule names alone, its code signal delta is zero. d1-triage's code signal delta is strictly positive everywhere (+0.0749 to +0.1106), demonstrating that the model actively reads Java AST syntax, conditional guards, and sanitizers.
+            <strong>Why Rule-Swap Verification matters:</strong> Models often cheat by latching onto rule names (e.g. predicting every alert from a high-risk rule is a True Positive). Shuffling code windows behind identical rules catches this: a rule-only model gets 0.0000 swap delta. Targeted prompting and Contrastive LoRA keep swap delta positive (+0.0749 to +0.1106), showing sensitivity to guards and sanitizers in the code.
           </div>
         </div>
       </div>
@@ -4197,11 +4200,11 @@ Reply with yes or no only.<|im_end|>
           },
           3: {
             heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-            telemetry: "Elapsed: 12.6ms | Prefill: 10.6ms on CPU (0 tokens decoded)",
+            telemetry: "Browser AST heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
             desc: "d1-3B executes a single forward pass over binary option heads. It scores YES (exploitable) vs NO (benign) in 10.6ms without autoregressive token generation overhead.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 45 (new File)\nInference: Single forward pass on CPU\nPrefill: 10.6ms (No autoregression)`,
+            inCode: `Target: Line 45 (new File)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 96.8%",
             outCode: `Logit(YES)    = +3.41  [96.8%]\nLogit(NO)     = -1.82  [3.2%]\nMargin Delta  = +5.23 (Threshold > 0)\nVerdict       = EXPLOITABLE TP`
@@ -4248,11 +4251,11 @@ Reply with yes or no only.<|im_end|>
           },
           3: {
             heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-            telemetry: "Elapsed: 12.6ms | Prefill: 10.6ms on CPU (0 tokens decoded)",
+            telemetry: "Browser AST heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
             desc: "d1-3B evaluates the guarded context in a single forward pass. Binary option logits decisively flip negative for vulnerability.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 28 (newDocumentBuilder)\nInference: Single forward pass on CPU\nPrefill: 10.6ms (No autoregression)`,
+            inCode: `Target: Line 28 (newDocumentBuilder)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 3.2%",
             outCode: `Logit(YES)    = -3.40  [3.2%]\nLogit(NO)     = +3.40  [96.8%]\nMargin Delta  = -6.80 (Threshold > 0)\nVerdict       = SAFE / FP`
@@ -4299,11 +4302,11 @@ Reply with yes or no only.<|im_end|>
           },
           3: {
             heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-            telemetry: "Elapsed: 12.6ms | Prefill: 10.6ms on CPU (0 tokens decoded)",
+            telemetry: "Browser AST heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
             desc: "d1-3B computes option logits in a single forward pass. High exploitability probability confirms critical command injection.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 19 (Runtime.exec)\nInference: Single forward pass on CPU\nPrefill: 10.6ms (No autoregression)`,
+            inCode: `Target: Line 19 (Runtime.exec)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 98.4%",
             outCode: `Logit(YES)    = +4.12  [98.4%]\nLogit(NO)     = -2.10  [1.6%]\nMargin Delta  = +6.22 (Threshold > 0)\nVerdict       = CRITICAL TP`
@@ -4350,11 +4353,11 @@ Reply with yes or no only.<|im_end|>
           },
           3: {
             heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-            telemetry: "Elapsed: 12.6ms | Prefill: 10.6ms on CPU (0 tokens decoded)",
+            telemetry: "Browser AST heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
             desc: "Single forward pass evaluates parameter binding. Logits strongly favor benign classification.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 32 (prepareStatement)\nInference: Single forward pass on CPU\nPrefill: 10.6ms (No autoregression)`,
+            inCode: `Target: Line 32 (prepareStatement)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 2.1%",
             outCode: `Logit(YES)    = -3.85  [2.1%]\nLogit(NO)     = +3.85  [97.9%]\nMargin Delta  = -7.70 (Threshold > 0)\nVerdict       = SAFE PARAMETERIZED`
@@ -4428,11 +4431,11 @@ Reply with yes or no only.<|im_end|>
       } else if (stationNum === 3) {
         return {
           heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-          telemetry: "Elapsed: " + dyn.latency + " | Prefill: 10.6ms CPU (0 tokens decoded)",
+          telemetry: "Elapsed: " + dyn.latency + " | Browser AST heuristic",
           desc: "d1-3B evaluates a single forward pass over binary option heads (YES vs NO) on CPU without autoregressive token generation.",
           inLabel: "Single-Pass Prompt Context",
           inTag: "0 Tokens Decoded",
-          inCode: "Target: Line " + dyn.sinkLine + " (" + dyn.sinkStmt + ")\nInference: Single forward pass on CPU\nPrefill: 10.6ms (No autoregression)",
+          inCode: "Target: Line " + dyn.sinkLine + " (" + dyn.sinkStmt + ")\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop",
           outLabel: "Confidence Score Breakdown",
           outTag: "P(TP): " + dyn.ptp,
           outCode: "YES (expl): " + (dyn.logitYes >= 0 ? '+' : '') + dyn.logitYes + "  [" + dyn.ptp + "]\nNO  (safe): " + (dyn.logitNo >= 0 ? '+' : '') + dyn.logitNo + "  [" + dyn.pfp + "]\nMargin Δ:  " + (dyn.marginDelta >= 0 ? '+' : '') + dyn.marginDelta + "  (Threshold > 0)"
