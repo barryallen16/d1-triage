@@ -1,13 +1,8 @@
-"""d1-triage - Liquid AI d1-3B SAST Alert Triage Gradio Web App.
-
-Optimized for standard CPU execution.
-Zero token decoding overhead: non-autoregressive single-pass forward prefill.
-"""
+"""d1-triage Gradio web demo for Java static analysis alert triage."""
 import os
 import sys
 import time
 from pathlib import Path
-
 
 current_dir = Path(__file__).resolve().parent
 if str(current_dir.parent) not in sys.path:
@@ -17,11 +12,10 @@ import gradio as gr
 from d1_triage.engine import D1TriageEngine, TriageFinding
 from d1_triage.sink_finder import find_sink_line
 
-
 USE_MOCK = os.environ.get("D1_TRIAGE_MOCK", "false").lower() in ("1", "true")
 MODEL_NAME = os.environ.get("MODEL_NAME", "LiquidAI/d1-3B")
 
-print(f"Initializing d1-triage Engine on CPU (Mock: {USE_MOCK}, Model: {MODEL_NAME})...")
+print(f"Initializing d1-triage Engine (Mock: {USE_MOCK}, Model: {MODEL_NAME})...")
 try:
     engine = D1TriageEngine(model_name=MODEL_NAME, mock=USE_MOCK, explain=True)
 except Exception as e:
@@ -167,18 +161,17 @@ custom_css = """
 }
 """
 
-with gr.Blocks(title="d1-triage - Liquid AI d1-3B SAST Triage") as demo:
+with gr.Blocks(title="d1-triage - Java SAST Alert Triage") as demo:
     gr.Markdown(
-        r"""
-        # d1-triage - Static Analysis Alert Triage
-        ### Powered by **Liquid AI d1-3B (CPU Execution)**
-        Single-pass forward prefill on commodity CPU | Calibrated ECE $\le$ 0.019.
+        """
+        # d1-triage - Static analysis alert triage
+        Sink-line grounding and AST heuristic fallback for Java security alerts.
         """
     )
 
     with gr.Row():
         preset_dropdown = gr.Dropdown(
-            label="Load Curated Benchmark Example",
+            label="Load preset Java snippet",
             choices=list(PRESETS.keys()),
             value="Path Traversal (Exploitable TP)",
             interactive=True,
@@ -258,10 +251,7 @@ with gr.Blocks(title="d1-triage - Liquid AI d1-3B SAST Triage") as demo:
     gr.Markdown(
         """
         ---
-        ### Commodity CPU Execution:
-        * **100% CPU Execution**: Runs on standard commodity CPU with zero GPU requirement.
-        * **Zero Token Decoding Bottleneck**: Non-autoregressive forward pass extracts target choice logits directly.
-        * **Efficient Memory Footprint**: Minimal RAM overhead leaves ample headroom for concurrent requests.
+        Runs statement-level sink grounding and heuristic checks in local demo mode. For GPU LoRA scoring, see `audit/d1_contrastive_lora_train.py`.
         """
     )
 

@@ -29,7 +29,6 @@ os.environ["WANDB_DISABLED"] = "true"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-# Remove broken preinstalled torchao before importing transformers/peft
 subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "torchao"], check=False)
 
 TRAIN_B64 = """{train_b64}"""

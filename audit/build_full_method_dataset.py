@@ -327,7 +327,6 @@ def main():
     rows = []
     seen_keys = set()
 
-    # 1. All real Semgrep findings + post-fix contrastive counterparts
     for f in results:
         p = Path(f["path"]).resolve()
         try:
@@ -403,7 +402,6 @@ def main():
                             "source": "semgrep_post",
                         })
 
-    # 2. Full enclosing touched methods matching RULE_PATTERNS (pre=TP, post=FP)
     added_pairs = 0
     for vid, info in meta_by_vid.items():
         entry = info["entry"]

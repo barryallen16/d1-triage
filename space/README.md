@@ -1,6 +1,6 @@
 ---
 title: d1-triage
-emoji: ⚡
+emoji: D1
 colorFrom: indigo
 colorTo: purple
 sdk: gradio
@@ -8,15 +8,10 @@ sdk_version: 6.32.0
 app_file: app.py
 pinned: false
 license: apache-2.0
-short_description: Liquid AI d1-3B SAST alert triage engine on CPU
+short_description: Java SAST alert triage preview with sink grounding
 ---
 
 # d1-triage
 
-Sub-second static analysis security alert triage using **Liquid AI d1-3B on CPU**.
-
-## Specifications
-* **Runtime**: Hugging Face Spaces (CPU)
-* **Model**: `LiquidAI/d1-3B` (CPU Execution)
-* **Inference**: Single-pass forward prefill on commodity CPU
-* **Accuracy**: 64.3% false alarm suppression with 0 missed vulnerabilities on real CVEs
+Gradio demo for Java static-analysis alert triage using sink-line grounding and the AST heuristic fallback (`D1_TRIAGE_MOCK=true` by default on CPU Spaces).
+On the offline GHSA evaluation set (174 rows), the full-method contrastive LoRA checkpoint reaches `0.8339` L3 ROC-AUC and `0.6027` same-rule L3 AUC (see `audit/TECHNICAL_REPORT.md`).

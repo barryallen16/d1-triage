@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
   <title>d1-triage - Real-World Java Static Analysis Alert Triage</title>
-  <meta name="description" content="Benchmarking Semgrep SAST alert triage in Java using Liquid AI d1-3B. Zero data leakage, 0.837 L3 ROC-AUC, and 12ms T4 forward pass.">
+  <meta name="description" content="Benchmarking Semgrep SAST alert triage in Java using Liquid AI d1-3B. 0.8339 L3 ROC-AUC with full-method Contrastive LoRA v2 on 174 GHSA and 14 Vul4J alerts.">
   <link rel="icon" type="image/svg+xml" href="d1.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2539,7 +2539,7 @@
         </div>
         <div class="stat-item">
           <div class="stat-value">~12 ms</div>
-          <div class="stat-label">Single-pass T4 forward pass (~484 ms end-to-end)</div>
+          <div class="stat-label">Single-pass T4 forward pass (456 ms avg loop)</div>
         </div>
         <div class="stat-item">
           <div class="stat-value">2.87 GB</div>
@@ -2742,19 +2742,19 @@
           <div class="bench-kpi-body">
             <div class="bench-kpi-value">0.8000</div>
             <div class="bench-kpi-label">Vul4J ROC-AUC (5 TP / 9 FP)</div>
-            <div class="bench-kpi-subtext">Zero-shot d1-3B beats Kev-4B (0.6667) and the Semgrep heuristic (0.5778) on Vul4J.</div>
+            <div class="bench-kpi-subtext">Zero-shot d1-3B beats Kev-4B (0.6667) and heuristic (0.5778); LoRA v2 drops to 0.5222.</div>
           </div>
         </div>
 
         <div class="bench-kpi-card">
           <div class="bench-kpi-top">
             <h3 class="bench-kpi-title">Code Discrimination</h3>
-            <span class="bench-kpi-badge bench-badge-blue">+31.9% Over Scanner</span>
+            <span class="bench-kpi-badge bench-badge-blue">+0.1027 Over Scanner</span>
           </div>
           <div class="bench-kpi-body">
-            <div class="bench-kpi-value">0.6594</div>
-            <div class="bench-kpi-label">Same-Rule Ranking (ROC-AUC)</div>
-            <div class="bench-kpi-subtext">Separates vulnerable functions from patched commits under identical AST rules (vs 0.5000 scanner coin-flip).</div>
+            <div class="bench-kpi-value">0.6027</div>
+            <div class="bench-kpi-label">Same-Rule L3 ROC-AUC (+0.0724 Swap)</div>
+            <div class="bench-kpi-subtext">Ranks vulnerable code above fixed counterparts under the same rule (scanner baseline: 0.5000).</div>
           </div>
         </div>
 
@@ -2764,21 +2764,21 @@
             <span class="bench-kpi-badge bench-badge-success">Single-Pass Logits</span>
           </div>
           <div class="bench-kpi-body">
-            <div class="bench-kpi-value">~12 ms</div>
-            <div class="bench-kpi-label">Forward Pass (T4 GPU)</div>
-            <div class="bench-kpi-subtext">Single forward-pass logit readout on Nvidia T4 (~484 ms end-to-end per finding in Python loop).</div>
+            <div class="bench-kpi-value">456 ms</div>
+            <div class="bench-kpi-label">Mean T4 Loop (~12 ms Fwd)</div>
+            <div class="bench-kpi-subtext">Measured average across 174 GHSA rows including prompt tokenization and Python loop overhead.</div>
           </div>
         </div>
 
         <div class="bench-kpi-card">
           <div class="bench-kpi-top">
-            <h3 class="bench-kpi-title">Hardware Footprint</h3>
-            <span class="bench-kpi-badge bench-badge-blue">Zero GPU Needed</span>
+            <h3 class="bench-kpi-title">Local Q8_0 Weights</h3>
+            <span class="bench-kpi-badge bench-badge-blue">GGUF Available</span>
           </div>
           <div class="bench-kpi-body">
-            <div class="bench-kpi-value">2.8 GB</div>
-            <div class="bench-kpi-label">Model Memory (RAM)</div>
-            <div class="bench-kpi-subtext">Runs locally in Git pre-commit hooks or CI runners. Zero cloud API fees, zero data egress.</div>
+            <div class="bench-kpi-value">2.87 GB</div>
+            <div class="bench-kpi-label">d1-3B Q8_0 GGUF Weights</div>
+            <div class="bench-kpi-subtext">CLI --mock runs local AST heuristics offline; GGUF scoring script runs via llama-cpp-python.</div>
           </div>
         </div>
       </div>
@@ -2790,9 +2790,9 @@
             <h3 style="font-size:1.1rem; font-weight:700; margin:0 0 6px 0; color:var(--text);">Within-Rule Discrimination</h3>
           </div>
           <p>
-            Can the model tell a vulnerable function from its patched commit when both match the exact same static AST rule?
-            Standard SAST scanners score 0.5000 (random coin flip) because their rules trigger on both.
-            d1-triage scores 0.6594 AUC because it verifies actual code guards and sanitizers.
+            Can the model separate vulnerable functions from fixed ones when both match the same Semgrep rule?
+            Static scanner rules score 0.5000 (random coin flip) because they fire on both.
+            Contrastive LoRA v2 reaches 0.6027 L3 within-rule AUC by checking guards in the code.
           </p>
         </div>
 
@@ -2801,18 +2801,18 @@
             <h3 style="font-size:1.1rem; font-weight:700; margin:0 0 6px 0; color:var(--text);">Verified Security Patches</h3>
           </div>
           <p>
-            Standard benchmarks count any alert in a modified file as a real bug (commit proxy), which pollutes metrics with tests, comments, and build files.
-            Our verified patch filter strictly requires the alert line to be inside the real security fix diff and match the advisory CVE type.
+            Location-proxy labels (L0) count any alert in a modified file or method, mixing tests and refactoring noise into true positives.
+            Verified patch labels (L3) require the alert line to sit inside the security fix diff and match the advisory CVE CWE.
           </p>
         </div>
 
         <div class="bench-guide-card">
           <div class="bench-guide-head">
-            <h3 style="font-size:1.1rem; font-weight:700; margin:0 0 6px 0; color:var(--text);">Vul4J Enterprise Benchmark</h3>
+            <h3 style="font-size:1.1rem; font-weight:700; margin:0 0 6px 0; color:var(--text);">Vul4J Census Check</h3>
           </div>
           <p>
-            Evaluated across 126 Apache and enterprise Java repositories (14 Semgrep alerts: 5 TP, 9 FP across 10 CVEs).
-            Zero-shot d1-3B scores 0.8000 AUC, while Contrastive LoRA drops to 0.5444 due to hunk-training mismatch.
+            Evaluated across 126 Java repositories (14 Semgrep alerts: 5 TP, 9 FP across 10 CVEs).
+            Zero-shot d1-3B scores 0.8000 AUC, while Contrastive LoRA v2 scores 0.5222 because the 465 training commits lack crypto and SSL rules.
           </p>
         </div>
       </div>
@@ -2821,13 +2821,13 @@
       <div class="bench-comparison-card">
         <div class="bench-comparison-header">
           <div class="bench-comparison-title-wrap">
-            <h3>Interactive Head-to-Head Comparison</h3>
-            <p>Compare decision speed, within-rule discrimination, and infrastructure requirements against standard architectures.</p>
+            <h3>Head-to-Head Benchmark Comparison</h3>
+            <p>Compare measured loop speed, L3 same-rule discrimination, and GHSA Verified Patch AUC across evaluated setups.</p>
           </div>
           <div class="bench-toggle-group">
             <button class="bench-toggle-btn active" id="btn-comp-latency" onclick="switchComparisonMetric('latency')">Decision Latency</button>
-            <button class="bench-toggle-btn" id="btn-comp-auc" onclick="switchComparisonMetric('auc')">Within-Rule Discrimination</button>
-            <button class="bench-toggle-btn" id="btn-comp-hw" onclick="switchComparisonMetric('hw')">Hardware & Footprint</button>
+            <button class="bench-toggle-btn" id="btn-comp-auc" onclick="switchComparisonMetric('auc')">Within-Rule AUC</button>
+            <button class="bench-toggle-btn" id="btn-comp-hw" onclick="switchComparisonMetric('hw')">Verified Patch AUC (L3)</button>
           </div>
         </div>
 
@@ -2836,44 +2836,44 @@
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>d1-triage (Liquid AI d1-3B)</strong>
-                <span class="badge-win">T4 Forward Pass</span>
+                <strong>d1-3B Contrastive LoRA (v2)</strong>
+                <span class="badge-win">1,643-Method LoRA</span>
               </span>
               <div class="comparison-val-wrap">
-                <span class="comparison-val">~12 ms</span>
+                <span class="comparison-val">~12 ms fwd (456 ms loop)</span>
                 <span class="comparison-delta comp-delta-good">Single-Pass Logit Readout</span>
               </div>
             </div>
             <div class="comp-bar-track">
-              <div class="comp-bar-fill comp-fill-best" style="width: 4%;"></div>
+              <div class="comp-bar-fill comp-fill-best" style="width: 35%;"></div>
             </div>
           </div>
 
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>Kev-4B (Dense Transformer)</strong>
-                <span class="badge-secondary">GPU Batch</span>
+                <strong>d1-3B Targeted Prompt</strong>
+                <span class="badge-secondary">Sink-Marked Base</span>
               </span>
               <div class="comparison-val-wrap">
-                <span class="comparison-val">450 ms</span>
-                <span class="comparison-delta comp-delta-warn">42x Slower</span>
+                <span class="comparison-val">626 ms loop</span>
+                <span class="comparison-delta comp-delta-warn">1.37x Loop Time</span>
               </div>
             </div>
             <div class="comp-bar-track">
-              <div class="comp-bar-fill comp-fill-mid" style="width: 25%;"></div>
+              <div class="comp-bar-fill comp-fill-mid" style="width: 63%;"></div>
             </div>
           </div>
 
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>Cloud LLMs (GPT-4o / Claude 3.5 Sonnet / 70B CoT)</strong>
-                <span class="badge-secondary">Cloud API</span>
+                <strong>d1-3B 50/50 Ensemble</strong>
+                <span class="badge-secondary">Prompt + LoRA Blend</span>
               </span>
               <div class="comparison-val-wrap">
-                <span class="comparison-val">3,800 ms</span>
-                <span class="comparison-delta comp-delta-bad">358x Slower</span>
+                <span class="comparison-val">~1.08 s loop</span>
+                <span class="comparison-delta comp-delta-bad">2 Forward Passes</span>
               </div>
             </div>
             <div class="comp-bar-track">
@@ -2882,7 +2882,7 @@
           </div>
 
           <div class="comp-note">
-            <strong>Why d1-3B is 140x to 350x faster:</strong> System 1 single-pass state-space evaluation extracts normalized choice logits in a single forward pass without autoregressive token generation (output_tokens: 0).
+            <strong>Single-pass logit readout:</strong> d1-3B evaluates yes/no logits on the final token position in one forward pass (output_tokens = 0). Measured loop times come from per-row timing recorded on T4 GPU.
           </div>
         </div>
 
@@ -2891,16 +2891,16 @@
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>d1-triage (d1-3B Contrastive LoRA)</strong>
-                <span class="badge-win">Champion</span>
+                <strong>d1-3B Contrastive LoRA (v2)</strong>
+                <span class="badge-win">L3 Champion</span>
               </span>
               <div class="comparison-val-wrap">
-                <span class="comparison-val">0.6594 AUC</span>
-                <span class="comparison-delta comp-delta-good">+31.9% Over Scanner</span>
+                <span class="comparison-val">0.6027 AUC</span>
+                <span class="comparison-delta comp-delta-good">+0.1027 Over Scanner</span>
               </div>
             </div>
             <div class="comp-bar-track">
-              <div class="comp-bar-fill comp-fill-best" style="width: 66%;"></div>
+              <div class="comp-bar-fill comp-fill-best" style="width: 60%;"></div>
             </div>
           </div>
 
@@ -2912,7 +2912,7 @@
               </span>
               <div class="comparison-val-wrap">
                 <span class="comparison-val">0.5100 AUC</span>
-                <span class="comparison-delta comp-delta-warn">+2.0% (Near Random)</span>
+                <span class="comparison-delta comp-delta-warn">+0.0100 (Near Random)</span>
               </div>
             </div>
             <div class="comp-bar-track">
@@ -2923,12 +2923,12 @@
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>Static Scanner Rules (Semgrep Heuristics)</strong>
+                <strong>Static Scanner Rules (Semgrep)</strong>
                 <span class="badge-secondary">Baseline</span>
               </span>
               <div class="comparison-val-wrap">
                 <span class="comparison-val">0.5000 AUC</span>
-                <span class="comparison-delta comp-delta-bad">Random Flip (0.0% Signal)</span>
+                <span class="comparison-delta comp-delta-bad">Random Flip</span>
               </div>
             </div>
             <div class="comp-bar-track">
@@ -2937,7 +2937,7 @@
           </div>
 
           <div class="comp-note">
-            <strong>Why Within-Rule Discrimination is the ultimate test:</strong> In production, static scanners fire on both vulnerable code and defensive patches. A model that only memorizes rule names gets 0.5000. d1-triage actively inspects code tokens to separate the fix from the bug.
+            <strong>Why within-rule checks matter:</strong> Static scanners fire on both vulnerable methods and patched commits sharing the same rule. A model using rule names alone scores 0.5000. Contrastive LoRA v2 holds +0.0724 L3 swap delta on GHSA.
           </div>
         </div>
 
@@ -2946,53 +2946,53 @@
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>d1-triage (d1-3B Q8 GGUF)</strong>
-                <span class="badge-win">Local CPU</span>
+                <strong>d1-3B Contrastive LoRA (v2)</strong>
+                <span class="badge-win">0.6027 Same-Rule</span>
               </span>
               <div class="comparison-val-wrap">
-                <span class="comparison-val">2.8 GB RAM</span>
-                <span class="comparison-delta comp-delta-good">$0 Cloud Cost • Private On-Prem</span>
+                <span class="comparison-val">0.8339 L3 AUC</span>
+                <span class="comparison-delta comp-delta-good">0.3023 P@90R (+0.0724 Swap)</span>
               </div>
             </div>
             <div class="comp-bar-track">
-              <div class="comp-bar-fill comp-fill-best" style="width: 18%;"></div>
+              <div class="comp-bar-fill comp-fill-best" style="width: 83%;"></div>
             </div>
           </div>
 
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>Kev-4B (Dense Transformer)</strong>
-                <span class="badge-secondary">GPU Dedicated</span>
+                <strong>Kev-4B (4B Dense Transformer)</strong>
+                <span class="badge-secondary">Base</span>
               </span>
               <div class="comparison-val-wrap">
-                <span class="comparison-val">16 GB VRAM</span>
-                <span class="comparison-delta comp-delta-warn">Dedicated GPU ($250+/month)</span>
+                <span class="comparison-val">0.7167 L3 AUC</span>
+                <span class="comparison-delta comp-delta-warn">0.5100 Same-Rule</span>
               </div>
             </div>
             <div class="comp-bar-track">
-              <div class="comp-bar-fill comp-fill-mid" style="width: 60%;"></div>
+              <div class="comp-bar-fill comp-fill-mid" style="width: 72%;"></div>
             </div>
           </div>
 
           <div class="comparison-row">
             <div class="comparison-meta">
               <span class="comparison-name">
-                <strong>Cloud LLM APIs (GPT-4o / Claude Enterprise)</strong>
-                <span class="badge-secondary">SaaS</span>
+                <strong>Semgrep Severity Heuristic</strong>
+                <span class="badge-secondary">Baseline</span>
               </span>
               <div class="comparison-val-wrap">
-                <span class="comparison-val">Cloud API Metered</span>
-                <span class="comparison-delta comp-delta-bad">$0.03 - $0.15 per file scan</span>
+                <span class="comparison-val">0.5235 L3 AUC</span>
+                <span class="comparison-delta comp-delta-bad">0.1609 P@90R</span>
               </div>
             </div>
             <div class="comp-bar-track">
-              <div class="comp-bar-fill comp-fill-slow" style="width: 100%;"></div>
+              <div class="comp-bar-fill comp-fill-slow" style="width: 52%;"></div>
             </div>
           </div>
 
           <div class="comp-note">
-            <strong>Zero GPU and zero cloud API dependency:</strong> Security architects can run d1-triage in air-gapped CI/CD environments without sending proprietary source code outside corporate network boundaries.
+            <strong>Triage ranker limit:</strong> Even at 0.8339 L3 AUC, P@90R is 0.3023 (catch 90% of verified bugs and roughly 70% of queued items remain false alarms), so d1-triage ranks queues for human review.
           </div>
         </div>
       </div>
@@ -3001,16 +3001,16 @@
       <div class="bench-table-container">
         <div class="bench-table-tabs" role="tablist" aria-label="Benchmark leaderboard views">
           <button type="button" role="tab" aria-selected="true" class="bench-table-tab active" id="tab-btn-summary" tabindex="0" onclick="switchBenchTab('summary')">
-            <span>Tab 1: Comprehensive Summary</span>
+            <span>Tab 1: Summary Leaderboard</span>
             <span class="bench-tab-badge">Model Comparison</span>
           </button>
           <button type="button" role="tab" aria-selected="false" class="bench-table-tab" id="tab-btn-vul4j" tabindex="-1" onclick="switchBenchTab('vul4j')">
-            <span>Tab 2: Vul4J Census Breakdown</span>
-            <span class="bench-tab-badge">14 Real CVEs</span>
+            <span>Tab 2: Vul4J Breakdown</span>
+            <span class="bench-tab-badge">14 Alerts</span>
           </button>
           <button type="button" role="tab" aria-selected="false" class="bench-table-tab" id="tab-btn-ghsa" tabindex="-1" onclick="switchBenchTab('ghsa')">
-            <span>Tab 3: GHSA Gold Standard</span>
-            <span class="bench-tab-badge">68 CVE Pairs</span>
+            <span>Tab 3: GHSA Label Levels</span>
+            <span class="bench-tab-badge">68 CVEs (174 Rows)</span>
           </button>
         </div>
 
@@ -3151,12 +3151,12 @@
         <div class="bench-tab-content" id="tab-vul4j" role="tabpanel" aria-labelledby="tab-btn-vul4j" hidden>
           <div class="bench-banner">
             <div>
-              <strong>Vul4J Enterprise Census:</strong> Complete scan of 126 Apache and enterprise Java repositories with Semgrep security rules.
+              <strong>Vul4J Scan Breakdown:</strong> Semgrep security scan across 126 Vul4J Java repositories (14 changed-file alerts: 5 TP, 9 FP across 10 CVEs).
             </div>
             <div class="bench-banner-stats">
-              <span class="bench-banner-stat-item"><span class="badge-win">5 / 5 Real CVEs Caught (100% Recall)</span></span>
-              <span class="bench-banner-stat-item"><span class="badge-champion">9 / 14 False Alarms Suppressed (64.3%)</span></span>
-              <span class="bench-banner-stat-item"><span class="badge-match">0 Dropped Bugs</span></span>
+              <span class="bench-banner-stat-item"><span class="badge-win">Zero-Shot d1-3B: 0.8000 AUC</span></span>
+              <span class="bench-banner-stat-item"><span class="badge-champion">Kev-4B: 0.6667 AUC</span></span>
+              <span class="bench-banner-stat-item"><span class="badge-match">LoRA v2: 0.5222 AUC</span></span>
             </div>
           </div>
           <div class="bench-scroll-wrap" tabindex="0" role="region" aria-label="Tab 2: Vul4J Census Breakdown">
@@ -3308,15 +3308,15 @@
         <div class="bench-tab-content" id="tab-ghsa" role="tabpanel" aria-labelledby="tab-btn-ghsa" hidden>
           <div class="bench-banner">
             <div>
-              <strong>GHSA Ground-Truth Hierarchy:</strong> 174 alert instances evaluated across 4 rigorous verification gates.
+              <strong>GHSA Label Hierarchy:</strong> 174 alerts across 68 advisories checked at four label levels (L0 to L3).
             </div>
             <div class="bench-banner-stats">
               <span class="bench-banner-stat-item">Advisories: <strong>68 CVEs</strong></span>
-              <span class="bench-banner-stat-item">Diff Pairs: <strong>416</strong></span>
-              <span class="bench-banner-stat-item">Code Delta: <strong>+0.1106</strong></span>
+              <span class="bench-banner-stat-item">LoRA Train Set: <strong>1,643 Methods</strong></span>
+              <span class="bench-banner-stat-item">L3 Swap Delta (LoRA v2): <strong>+0.0724</strong></span>
             </div>
           </div>
-          <div class="bench-scroll-wrap" tabindex="0" role="region" aria-label="Tab 3: GHSA Gold Standard">
+          <div class="bench-scroll-wrap" tabindex="0" role="region" aria-label="Tab 3: GHSA Label Levels">
             <table>
               <thead>
                 <tr>
@@ -3325,52 +3325,52 @@
                   <th>Findings</th>
                   <th>True Positives</th>
                   <th>Scanner AUC</th>
-                  <th>d1-triage AUC</th>
-                  <th>Code Signal Delta</th>
+                  <th>LoRA v2 AUC</th>
+                  <th>Swap Delta</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td><strong>Level 0 (Location Proxy)</strong></td>
-                  <td>Alert falls inside any file or method modified by the security commit. Includes unrelated refactoring.</td>
+                  <td>Alert falls inside any method modified by the security commit (mixes in tests and helpers).</td>
                   <td>174</td>
                   <td>85 TP (48.9%)</td>
                   <td>0.5886</td>
-                  <td><strong>0.6941</strong></td>
-                  <td>+0.0749</td>
+                  <td><strong>0.7119</strong></td>
+                  <td>+0.0365</td>
                 </tr>
                 <tr>
                   <td><strong>Level 1 (Hunk Aligned)</strong></td>
-                  <td>Alert line is strictly inside the modified vulnerability fix hunk in the Git diff.</td>
+                  <td>Alert line sits inside the modified security fix hunk in the Git diff.</td>
                   <td>174</td>
                   <td>44 TP (25.3%)</td>
                   <td>0.5220</td>
-                  <td><strong>0.6672</strong></td>
-                  <td>+0.0468</td>
+                  <td><strong>0.6680</strong></td>
+                  <td>+0.0457</td>
                 </tr>
                 <tr>
                   <td><strong>Level 2 (Stored + CWE)</strong></td>
-                  <td>Static rule CWE strictly matches the confirmed advisory CVE CWE classification.</td>
+                  <td>Rule CWE matches the confirmed advisory CVE CWE category.</td>
                   <td>174</td>
                   <td>53 TP (30.5%)</td>
                   <td>0.6223</td>
-                  <td><strong>0.7861</strong></td>
-                  <td>+0.0780</td>
+                  <td><strong>0.7977</strong></td>
+                  <td>+0.0681</td>
                 </tr>
                 <tr class="highlight-row" style="background: rgba(37, 99, 235, 0.08);">
                   <td><strong>Level 3 (Verified Hunk + CWE)</strong></td>
-                  <td><span class="badge-champion">Gold Standard</span> Alert line is inside fix hunk AND matches CVE CWE. Eliminates all spurious shortcuts.</td>
+                  <td><span class="badge-champion">Verified Patch</span> Alert line sits inside the fix hunk AND matches the CVE CWE.</td>
                   <td>174</td>
                   <td>28 TP (16.1%)</td>
                   <td>0.5235</td>
-                  <td><strong style="color: #93c5fd;">0.8372 (Base)</strong></td>
-                  <td><strong style="color: #34d399;">+0.1106 (LoRA)</strong></td>
+                  <td><strong style="color: #93c5fd;">0.8339 (LoRA v2)</strong></td>
+                  <td><strong style="color: #34d399;">+0.0724</strong></td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div class="comp-note" style="margin: 16px 20px 20px;">
-            <strong>Why Rule-Swap Verification matters:</strong> Models often cheat by latching onto rule names (e.g. predicting every alert from a high-risk rule is a True Positive). Shuffling code windows behind identical rules catches this: a rule-only model gets 0.0000 swap delta. Targeted prompting and Contrastive LoRA keep swap delta positive (+0.0749 to +0.1106), showing sensitivity to guards and sanitizers in the code.
+            <strong>Rule-swap check:</strong> Models can score high by learning rule base rates. Shuffling code windows within each rule tests if predictions depend on the code: a rule-only model drops to 0.0000 swap delta. Contrastive LoRA v2 holds +0.0365 (L0) to +0.0724 (L3).
           </div>
         </div>
       </div>
@@ -3381,9 +3381,9 @@
   <section class="section" id="architecture">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">Why other approaches fail (and how d1 succeeds)</h2>
+        <h2 class="section-title">How d1-triage evaluates alerts</h2>
         <p class="section-desc">
-          Standard LLMs memorize rule keywords or exploit dataset labeling shortcuts. d1-triage enforces code-level dataflow attention.
+          Grounding the flagged line and fine-tuning on full enclosing methods pushes the model to inspect guards around the sink.
         </p>
       </div>
 
@@ -3404,7 +3404,7 @@
           </div>
           <h3>Statement Sink Anchoring</h3>
           <p>
-            AST analysis isolates the exact constructor or method invocation (`new File`, `dbf.setFeature`) with `&gt;&gt;&gt; [ALERT LINE]`. This anchors the attention window and lifts within-rule discrimination by +17% AUC.
+            <code>d1_triage/sink_finder.py</code> locates the flagged sink statement (<code>new File</code>, <code>dbf.setFeature</code>) and adds <code>&gt;&gt;&gt; [ALERT LINE]</code>, lifting L0 within-rule AUC from 0.4297 to 0.5986.
           </p>
         </div>
 
@@ -3425,9 +3425,9 @@
               <line x1="80" y1="44" x2="120" y2="36" stroke="#93c5fd" stroke-width="0.8" stroke-dasharray="2 2"/>
             </svg>
           </div>
-          <h3>Zero-Leakage Contrastive Tuning</h3>
+          <h3>Full-Method Contrastive LoRA</h3>
           <p>
-            Trained on 416 real-world pre-fix (vulnerable) and post-fix (repaired) method pairs from 40 held-out repositories. 0% advisory overlap with evaluation benchmarks guarantees generalizable real-world transfer.
+            Trained with direct 2-class logit loss and KL anchoring on 1,643 non-test Java methods from 465 held-out commits, with zero overlap against the 68 GHSA evaluation advisories.
           </p>
         </div>
 
@@ -3454,7 +3454,7 @@
           </div>
           <h3>Rule-Swap Control Verification</h3>
           <p>
-            Under paired rule-swap controls, code signal delta is strictly positive everywhere (+0.0749 to +0.1106), proving the model inspects Java syntax and guards rather than blindly echoing rule priors.
+            Swap deltas stay positive across all four levels (+0.0365 on L0 to +0.0724 on L3 for LoRA v2), showing sensitivity to guards in the method body.
           </p>
         </div>
       </div>
@@ -3465,9 +3465,9 @@
   <section class="section" id="quickstart">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">Get Started in 30 Seconds</h2>
+        <h2 class="section-title">CLI Quickstart</h2>
         <p class="section-desc">
-          Run locally via Python CLI, integrate with GitHub Actions, or deploy via our slim Docker container.
+          Run local AST heuristic mode via Python CLI or Docker, or inspect the benchmark metrics in audit/.
         </p>
       </div>
 
@@ -3516,17 +3516,17 @@
   <section class="section" id="artifacts">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">Published Artifacts & Resources</h2>
+        <h2 class="section-title">Published Artifacts</h2>
         <p class="section-desc">
-          Everything needed to evaluate, reproduce, or deploy d1-triage is openly available across Hugging Face and GitHub.
+          Model weights, benchmark datasets, audit notes, and the CLI live on Hugging Face and GitHub.
         </p>
       </div>
 
       <div class="artifacts-grid">
         <a href="https://huggingface.co/barryallen16/d1-3B-java-vuln-triage" target="_blank" rel="noreferrer" class="artifact-card">
           <div class="artifact-top">
-            <div class="artifact-icon-wrap" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;">
-              <span>🤗</span>
+            <div class="artifact-icon-wrap" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;">
+              <span>HF</span>
             </div>
             <span class="artifact-badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3);">Model</span>
           </div>
@@ -3534,7 +3534,7 @@
             <h3 class="artifact-title">Hugging Face Model</h3>
             <span class="artifact-id">barryallen16/d1-3B-java-vuln-triage</span>
             <p class="artifact-desc">
-              Fine-tuned Liquid AI d1-3B Q8_0 weights (2.87 GB). Calibrated for CPU AST triage with zero runtime leakage.
+              Fine-tuned Liquid AI d1-3B weights and evaluation artifacts.
             </p>
           </div>
           <div class="artifact-action">
@@ -3545,8 +3545,8 @@
 
         <a href="https://huggingface.co/datasets/barryallen16/d1-triage" target="_blank" rel="noreferrer" class="artifact-card">
           <div class="artifact-top">
-            <div class="artifact-icon-wrap" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
-              <span>📊</span>
+            <div class="artifact-icon-wrap" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;">
+              <span>DATA</span>
             </div>
             <span class="artifact-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">Dataset</span>
           </div>
@@ -3554,7 +3554,7 @@
             <h3 class="artifact-title">Hugging Face Dataset</h3>
             <span class="artifact-id">datasets/barryallen16/d1-triage</span>
             <p class="artifact-desc">
-              174 curated real-world Java alerts across 68 GitHub advisories and the complete 126-repository Vul4J census.
+              174 real-world Java alerts across 68 GitHub advisories and 14 across 126 Vul4J repos.
             </p>
           </div>
           <div class="artifact-action">
@@ -3574,7 +3574,7 @@
             <h3 class="artifact-title">Technical Report</h3>
             <span class="artifact-id">audit/TECHNICAL_REPORT.md</span>
             <p class="artifact-desc">
-              Empirical proofs, rule priors, paired-control swap deltas, and 95% confidence intervals across benchmarks.
+              Label levels, rule priors, swap deltas, and LoRA results across benchmarks.
             </p>
           </div>
           <div class="artifact-action">
@@ -4204,7 +4204,7 @@ Reply with yes or no only.<|im_end|>
             desc: "d1-3B executes a single forward pass over binary option heads. It scores YES (exploitable) vs NO (benign) in 10.6ms without autoregressive token generation overhead.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 45 (new File)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop`,
+            inCode: `Target: Line 45 (new File)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 96.8%",
             outCode: `Logit(YES)    = +3.41  [96.8%]\nLogit(NO)     = -1.82  [3.2%]\nMargin Delta  = +5.23 (Threshold > 0)\nVerdict       = EXPLOITABLE TP`
@@ -4255,7 +4255,7 @@ Reply with yes or no only.<|im_end|>
             desc: "d1-3B evaluates the guarded context in a single forward pass. Binary option logits decisively flip negative for vulnerability.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 28 (newDocumentBuilder)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop`,
+            inCode: `Target: Line 28 (newDocumentBuilder)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 3.2%",
             outCode: `Logit(YES)    = -3.40  [3.2%]\nLogit(NO)     = +3.40  [96.8%]\nMargin Delta  = -6.80 (Threshold > 0)\nVerdict       = SAFE / FP`
@@ -4263,7 +4263,7 @@ Reply with yes or no only.<|im_end|>
           4: {
             heading: "Stage 04: Deterministic Triage Fork (Suppressed)",
             telemetry: "Elapsed: 12.7ms Total | Action: NOISE SUPPRESSION TRAP",
-            desc: "Because P(YES) < 0.50, the finding is silently discarded into the compliance audit log. 0 developer interruption. Achieves 64.3% noise reduction.",
+            desc: "Because P(YES) < 0.50, the finding is routed to the suppression log.",
             inLabel: "Deterministic Decision",
             inTag: "Benign False Alarm",
             inCode: `Status: GUARDED / FALSE POSITIVE\nProbability P(TP): 3.2%\nConfidence: High (-6.80 logit margin)\nAction: Suppressed from developer notifications`,
@@ -4306,7 +4306,7 @@ Reply with yes or no only.<|im_end|>
             desc: "d1-3B computes option logits in a single forward pass. High exploitability probability confirms critical command injection.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 19 (Runtime.exec)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop`,
+            inCode: `Target: Line 19 (Runtime.exec)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 98.4%",
             outCode: `Logit(YES)    = +4.12  [98.4%]\nLogit(NO)     = -2.10  [1.6%]\nMargin Delta  = +6.22 (Threshold > 0)\nVerdict       = CRITICAL TP`
@@ -4357,7 +4357,7 @@ Reply with yes or no only.<|im_end|>
             desc: "Single forward pass evaluates parameter binding. Logits strongly favor benign classification.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 32 (prepareStatement)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop`,
+            inCode: `Target: Line 32 (prepareStatement)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 2.1%",
             outCode: `Logit(YES)    = -3.85  [2.1%]\nLogit(NO)     = +3.85  [97.9%]\nMargin Delta  = -7.70 (Threshold > 0)\nVerdict       = SAFE PARAMETERIZED`
@@ -4435,7 +4435,7 @@ Reply with yes or no only.<|im_end|>
           desc: "d1-3B evaluates a single forward pass over binary option heads (YES vs NO) on CPU without autoregressive token generation.",
           inLabel: "Single-Pass Prompt Context",
           inTag: "0 Tokens Decoded",
-          inCode: "Target: Line " + dyn.sinkLine + " (" + dyn.sinkStmt + ")\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / ~484ms loop",
+          inCode: "Target: Line " + dyn.sinkLine + " (" + dyn.sinkStmt + ")\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop",
           outLabel: "Confidence Score Breakdown",
           outTag: "P(TP): " + dyn.ptp,
           outCode: "YES (expl): " + (dyn.logitYes >= 0 ? '+' : '') + dyn.logitYes + "  [" + dyn.ptp + "]\nNO  (safe): " + (dyn.logitNo >= 0 ? '+' : '') + dyn.logitNo + "  [" + dyn.pfp + "]\nMargin Δ:  " + (dyn.marginDelta >= 0 ? '+' : '') + dyn.marginDelta + "  (Threshold > 0)"

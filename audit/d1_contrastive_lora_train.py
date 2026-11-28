@@ -1,7 +1,7 @@
-"""Fine-tune LiquidAI/d1-3B on real-world contrastive CVE patch diffs.
+"""Fine-tune LiquidAI/d1-3B on full-method contrastive CVE pairs.
 
-Uses 416 real-world balanced Java vulnerability/patch pairs (zero synthetic Juliet).
-Evaluates the merged champion model across:
+Reads audit/full_method_train.jsonl (1,643 non-test Java methods from 465 held-out commits)
+and evaluates the merged adapter on:
 1. GHSA 174 rows (Identity)
 2. GHSA 174 rows (Rule Swap Control)
 3. Vul4J 14 rows (Identity)

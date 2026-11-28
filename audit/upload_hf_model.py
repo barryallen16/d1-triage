@@ -1,6 +1,4 @@
 """Upload Liquid AI d1-3B Java Vulnerability Triage benchmark & artifacts to Hugging Face."""
-import os
-import sys
 from pathlib import Path
 from huggingface_hub import HfApi
 
@@ -22,48 +20,30 @@ base_model: LiquidAI/d1-3B
 pipeline_tag: text-classification
 ---
 
-# Liquid AI d1-3B: Real-World Java Static Analysis Alert Triage Benchmark
+# Liquid AI d1-3B: Java Static Analysis Alert Triage
 
-This repository hosts the benchmark reproduction suite, evaluation artifacts, and contrastive fine-tuning code for **Liquid AI's d1-3B hybrid foundation model** applied to real-world static analysis alert triage.
+Benchmark artifacts, evaluation scripts, and full-method contrastive LoRA training code for ranking Java Semgrep alerts with Liquid AI `d1-3B`.
 
-Evaluated on 174 real-world Java security findings across 68 GitHub advisories (GHSA) and the exhaustive census of all Semgrep security findings across all 126 repositories in the **Vul4J** benchmark.
+Evaluated on 174 real-world Java findings across 68 GitHub advisories (GHSA) and 14 findings across 126 Vul4J repositories (5 TP, 9 FP).
 
----
+## Benchmark leaderboard
 
-## Benchmark Leaderboard
-
-| Model / Variant | Architecture | L0 Location Proxy AUC | L0 Within-Rule AUC | L0 Code Signal Delta | L2 Stored + CWE AUC | L2 Within-Rule AUC | L3 Clean Hunk + CWE AUC | L3 Within-Rule AUC | Vul4J Real CVEs AUC |
+| Model / Variant | Architecture | L0 AUC | L0 Within-Rule AUC | L0 Swap Delta | L2 AUC | L2 Within-Rule AUC | L3 Verified Patch AUC | L3 Within-Rule AUC | Vul4J AUC (n=14) |
 |---|---|---|---|---|---|---|---|---|---|
-| **Heuristic Baseline** | Scanner rules | 0.5886 | 0.5000 | N/A | 0.6223 | 0.5000 | 0.5235 | 0.5000 | 0.5778 |
-| **Kev-4B** | 4B Dense Transformer | 0.7521 | 0.4612 | +0.0180 | 0.7594 | 0.4820 | 0.7167 | 0.5100 | 0.6667 |
-| **d1-3B Zero-Shot (Audit)** | 3B Hybrid SSM | 0.6941 | 0.4297 | +0.0202 | 0.7861 | 0.4571 | **0.8372** | 0.5495 | **0.8000** |
-| **d1-3B Targeted Prompt** | 3B Hybrid SSM | 0.6098 | **0.5986** | +0.0749 | 0.5843 | **0.6321** | 0.6261 | 0.5761 | **0.8000** |
-| **d1-3B Contrastive LoRA** | 3B Hybrid SSM | 0.5953 | 0.5374 | **+0.0839** | 0.5214 | 0.5095 | 0.5988 | **0.6594** | 0.5444 |
-| **d1-3B 50/50 Ensemble** | 3B Hybrid SSM | 0.6227 | **0.6213** | +0.0794 | 0.5682 | **0.6214** | 0.6125 | **0.6280** | **0.8000** |
+| Heuristic Baseline | Scanner rules | 0.5886 | 0.5000 | N/A | 0.6223 | 0.5000 | 0.5235 | 0.5000 | 0.5778 |
+| Kev-4B | 4B Dense Transformer | 0.7521 | 0.4612 | +0.0180 | 0.7594 | 0.4820 | 0.7167 | 0.5100 | 0.6667 |
+| d1-3B Zero-Shot (Audit) | 3B Hybrid SSM | 0.6941 | 0.4297 | +0.0202 | 0.7861 | 0.4571 | 0.8372 | 0.5495 | 0.8000 |
+| d1-3B Targeted Prompt | 3B Hybrid SSM | 0.6098 | 0.5986 | +0.0749 | 0.5843 | 0.6321 | 0.6261 | 0.5761 | N/A |
+| d1-3B Contrastive LoRA (v2) | 3B Hybrid SSM | 0.7119 | 0.4308 | +0.0365 | 0.7977 | 0.5560 | 0.8339 | 0.6027 | 0.5222 |
 
----
+## Summary
 
-## Key Findings
-
-1. **Verified Fix Hunks (L3)**:
-   - On clean vulnerability fix hunks matching the reported CWE, `d1-3B` achieves **0.8372 AUC**, exceeding Kev-4B (0.7167) by **+12.05% AUC**.
-2. **Vul4J Benchmark Evaluation**:
-   - Across the complete population of Semgrep security findings on 126 Vul4J projects, `d1-3B` achieves **0.8000 AUC** and **0.5556 P@90R**, beating Kev-4B (0.6667) by **+13.33% AUC**.
-3. **Fixed Within-Rule Discrimination**:
-   - Zero-shot d1-3B previously suffered from a 0.4297 within-rule AUC due to source line number disconnect.
-   - Introducing statement-level sink grounding (`>>> [ALERT LINE {n}]`) increased within-rule AUC to **0.5986** (L0) and **0.6321** (L2).
-   - Real-to-real contrastive tuning on 416 real pre/post patch pairs pushed L3 within-rule AUC to **0.6594**.
-4. **Verified Code-Level Sensitivity**:
-   - Under paired rule-swap controls, code signal delta is strictly positive everywhere (+0.0749 on L0, +0.1106 on L3), proving the model inspects Java code dataflow rather than merely relying on rule semantics.
-5. **Runtime Efficiency**:
-   - Inference latency: **12-14 ms** per alert on an Nvidia T4 GPU (6.25 GiB peak VRAM).
-   - CPU latency: **1.0-2.0 s** on standard multi-core CPUs.
-
----
+- On GHSA L3 (alert inside a verified fix hunk and matching CVE CWE, 28 of 174 rows), full-method Contrastive LoRA v2 trained on 1,643 methods from 465 held-out commits reaches `0.8339` AUC (`0.3023` P@90R) vs `0.7167` for Kev-4B and `0.5235` for the heuristic baseline.
+- Within the same Semgrep rule family, Contrastive LoRA v2 reaches `0.6027` L3 AUC with `+0.0724` L3 rule-swap delta, showing code sensitivity on verified fix hunks.
+- Mean end-to-end T4 loop time recorded in `d1_lora_identity_ghsa.jsonl` is `456 ms` per row (~12 ms single-pass forward score).
+- Because L3 `P@90R` is `0.3023` and Vul4J LoRA AUC is `0.5222`, this checkpoint fits alert queue ranking, not autonomous suppression.
 
 ## Quickstart
-
-Run triage using the official `LiquidAI/d1-3B` model:
 
 ```python
 import torch
@@ -71,7 +51,6 @@ from transformers import AutoModel
 
 model = AutoModel.from_pretrained("LiquidAI/d1-3B", trust_remote_code=True, torch_dtype=torch.float16).cuda()
 
-# Question with taint-reachability criteria
 QUESTION = "Is this static-analysis warning a real, exploitable security bug at the flagged sink (marked with >>>) in the code below? Answer yes only if untrusted input reaches this specific sink without an effective guard."
 CRITERIA = {
     "true": "Untrusted input reaches the flagged sink marked with '>>>', and no effective validation, escaping, or containment check neutralizes it in the code.",
@@ -79,7 +58,6 @@ CRITERIA = {
 }
 QUESTIONS = {"tp": {"type": "noul", "instructions": QUESTION, "criteria": CRITERIA}}
 
-# Formatted prompt with statement-level sink marker
 state = \"\"\"Rule: java.lang.security.audit.path-traversal
 CWE: CWE-22
 File: FileServer.java
@@ -100,14 +78,10 @@ p_tp = float(result[0]["answers"]["tp"]["noul"])
 print(f"Exploitability Probability: {p_tp:.4f}")
 ```
 
----
-
-## Local Reproduction
-
-Reproduce all benchmark numbers locally with zero dependencies (requires only Python + numpy):
+## Local reproduction
 
 ```bash
-python evaluate_d1.py
+uv run python audit/evaluate_d1.py
 ```
 """
 
@@ -115,7 +89,6 @@ python evaluate_d1.py
 def main():
     api = HfApi()
     print(f"Uploading artifacts to Hugging Face: {REPO_ID}...")
-
 
     api.upload_file(
         path_or_fileobj=MODEL_CARD.encode("utf-8"),
@@ -126,8 +99,8 @@ def main():
     )
     print("  [Uploaded] README.md")
 
-
     files_to_upload = [
+        ("full_method_train.jsonl", "full_method_train.jsonl"),
         ("contrastive_train.jsonl", "contrastive_train.jsonl"),
         ("d1_lora_identity_ghsa.jsonl", "d1_lora_identity_ghsa.jsonl"),
         ("d1_lora_swap_ghsa.jsonl", "d1_lora_swap_ghsa.jsonl"),
@@ -151,7 +124,7 @@ def main():
             )
             print(f"  [Uploaded] {repo_name}")
 
-    print(f"\nAll benchmark artifacts successfully published to: https://huggingface.co/{REPO_ID}")
+    print(f"\nUploaded artifacts to: https://huggingface.co/{REPO_ID}")
 
 
 if __name__ == "__main__":

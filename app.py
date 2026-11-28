@@ -1,13 +1,8 @@
-"""d1-triage - Liquid AI d1-3B SAST Alert Triage Gradio Web App.
-
-Optimized for Hugging Face Spaces Free Tier (CPU Basic: 2 vCPU, 16 GB RAM).
-Zero token decoding overhead: single-pass forward classification on CPU.
-"""
+"""d1-triage Gradio web demo for Java static analysis alert triage."""
 import os
 import sys
 import time
 from pathlib import Path
-
 
 current_dir = Path(__file__).resolve().parent
 if str(current_dir.parent) not in sys.path:
@@ -16,7 +11,6 @@ if str(current_dir.parent) not in sys.path:
 import gradio as gr
 from d1_triage.engine import D1TriageEngine, TriageFinding
 from d1_triage.sink_finder import find_sink_line
-
 
 USE_MOCK = os.environ.get("D1_TRIAGE_MOCK", "false").lower() in ("1", "true")
 MODEL_NAME = os.environ.get("MODEL_NAME", "LiquidAI/d1-3B")
@@ -170,19 +164,17 @@ custom_css = """
 }
 """
 
-with gr.Blocks(title="d1-triage - Liquid AI d1-3B SAST Triage") as demo:
+with gr.Blocks(title="d1-triage - Java SAST Alert Triage") as demo:
     gr.Markdown(
         """
-        # d1-triage - Static Analysis Alert Triage
-        ### Powered by **Liquid AI d1-3B (GGUF Q8_0 Quantized)**
-        Hosted on Hugging Face Spaces **Free Tier** (CPU Basic: 2 vCPU, 16 GB RAM).
-        Single-pass forward prefill | Peak RAM: ~3.14 GiB | Calibrated ECE $\le$ 0.019.
+        # d1-triage - Static analysis alert triage
+        Sink-line grounding and AST heuristic fallback (`D1_TRIAGE_MOCK=true` by default on CPU Spaces).
         """
     )
 
     with gr.Row():
         preset_dropdown = gr.Dropdown(
-            label="Load Curated Benchmark Example",
+            label="Load preset Java snippet",
             choices=list(PRESETS.keys()),
             value="Path Traversal (Exploitable TP)",
             interactive=True,
@@ -261,10 +253,7 @@ with gr.Blocks(title="d1-triage - Liquid AI d1-3B SAST Triage") as demo:
     gr.Markdown(
         """
         ---
-        ### Why d1-3B Fits Free Tier Hugging Face Spaces:
-        * **100% Free CPU Basic**: Runs on standard 2 vCPU and 16 GB RAM with no GPU required.
-        * **Zero Token Latency**: Computes non-autoregressive logits over valid choices in a single forward pass (~240ms - 800ms).
-        * **Low Peak RAM**: 1.67 GB (Q4_K_M GGUF) or 6.2 GB (FP32 PyTorch) leaves ample headroom under HF's 16.0 GB ceiling.
+        Runs statement-level sink grounding and heuristic checks in local demo mode. For GPU LoRA scoring, see `audit/d1_contrastive_lora_train.py`.
         """
     )
 
