@@ -43,27 +43,28 @@ Under paired rule-swap controls (shuffling code windows within the same rule fam
 Fine-tuning on synthetic Juliet cases hurt real-world transfer (`0.449` within-rule AUC) because Juliet uses artificial `bad()` and `good()` names.
 To avoid leakage, I extracted 40 held-out advisory patches with zero overlap against the 68 evaluation advisories, producing 208 pre-fix (TP) and 208 post-fix (FP) pairs in [contrastive_train.jsonl](contrastive_train.jsonl).
 
-Training LoRA (rank 8, alpha 16, `lr=5e-5`, 2 epochs, completion-only loss masking on `yes`/`no`, 296 non-test rows with `find_sink_line` grounding) on a T4 GPU took `275.9s`:
+To scale beyond short diff hunks, [build_full_method_dataset.py](build_full_method_dataset.py) checked out `465` leak-free held-out commits from the OSV Maven export, ran Semgrep, and extracted `1,643` non-test full enclosing Java methods (`797` TP / `846` FP across `729` pre/post pairs and `185` direct Semgrep findings) into [full_method_train.jsonl](full_method_train.jsonl).
 
-- Vul4J AUC improved from `0.5444` (earlier full-sequence `r=16, lr=1e-4` run) to `0.7000` (`P@90R = 0.5000`), beating Heuristic (`0.5778`) and Kev-4B (`0.6667`).
-- L3 AUC improved from `0.5988` to `0.6520` (`0.6014` within-rule AUC, `P@90R = 0.1971`, `+0.0541` swap delta).
-- L2 within-rule AUC reached `0.6310` (`+0.0770` swap delta, `0.5872` overall AUC).
-- L0 and L1 overall AUC remain lower than zero-shot (`0.5282` and `0.5390`) because [prepare_contrastive_dataset.py](prepare_contrastive_dataset.py) still extracts short raw diff hunks instead of full enclosing methods.
+Replacing full-vocabulary SFT loss with a direct 2-class cross-entropy loss over `d1-3B`'s `YES_FORMS` and `NO_FORMS` answer-slot logits plus a KL anchor toward the base model (`KL_WEIGHT = 0.2`, `3x` Semgrep upweighting, `2` epochs, `r=8`, `lr=3e-5`) produced the champion GHSA checkpoint:
+
+- L3 Verified Patch AUC reached `0.8339` (`+0.3104` over Heuristic `0.5235`, `+0.1172` over Kev-4B `0.7167`), with `0.6027` within-rule AUC, `+0.0724` swap delta, and `0.3023` `P@90R` (up from `0.1609` Heuristic and `0.1806` Targeted Prompt).
+- L2 AUC reached `0.7977` (`P@90R = 0.4752`), L1 AUC reached `0.6680`, and L0 AUC reached `0.7119`.
+- Vul4J AUC (`n=14`) was `0.5222` because [full_method_train.jsonl](full_method_train.jsonl) lacks crypto/SSL patterns present in Vul4J; a stronger KL anchor (`KL_WEIGHT = 0.5`, `r=16`, `1` epoch) kept Vul4J at `0.6889` (`P@90R = 0.5556`) and L2 within-rule AUC at `0.6595` with `0.7083` L3 AUC.
 
 ## 4. Comparative numbers
 
 | Benchmark Level | Heuristic Baseline | Kev-4B (4B Dense) | d1-3B Zero-Shot | d1-3B Targeted Prompt | d1-3B Contrastive LoRA |
 |---|---|---|---|---|---|
-| L0 Location Proxy AUC | 0.5886 | 0.7521 | 0.6941 | 0.6098 | 0.5282 |
-| L0 Within-Rule AUC | 0.5000 | 0.4612 | 0.4297 | 0.5986 | 0.4728 |
-| L0 Swap Delta | N/A | +0.0180 | +0.0202 | +0.0749 | +0.0396 |
-| L1 Clean Hunk AUC | 0.5220 | 0.6612 | 0.6672 | 0.5937 | 0.5390 |
-| L2 Stored + CWE AUC | 0.6223 | 0.7594 | 0.7861 | 0.5843 | 0.5872 |
-| L2 Within-Rule AUC | 0.5000 | 0.4820 | 0.4571 | 0.6321 | 0.6310 |
-| L3 Clean Hunk + CWE AUC | 0.5235 | 0.7167 | 0.8372 | 0.6261 | 0.6520 |
-| L3 Within-Rule AUC | 0.5000 | 0.5100 | 0.5495 | 0.5761 | 0.6014 |
-| L3 Swap Delta | N/A | +0.0210 | +0.0150 | +0.0462 | +0.0541 |
-| Vul4J Real CVEs AUC (n=14) | 0.5778 | 0.6667 | 0.8000 | N/A | 0.7000 |
+| L0 Location Proxy AUC | 0.5886 | 0.7521 | 0.6941 | 0.6098 | 0.7119 |
+| L0 Within-Rule AUC | 0.5000 | 0.4612 | 0.4297 | 0.5986 | 0.4308 |
+| L0 Swap Delta | N/A | +0.0180 | +0.0202 | +0.0749 | +0.0365 |
+| L1 Clean Hunk AUC | 0.5220 | 0.6612 | 0.6672 | 0.5937 | 0.6680 |
+| L2 Stored + CWE AUC | 0.6223 | 0.7594 | 0.7861 | 0.5843 | 0.7977 |
+| L2 Within-Rule AUC | 0.5000 | 0.4820 | 0.4571 | 0.6321 | 0.5560 |
+| L3 Clean Hunk + CWE AUC | 0.5235 | 0.7167 | 0.8372 | 0.6261 | 0.8339 |
+| L3 Within-Rule AUC | 0.5000 | 0.5100 | 0.5495 | 0.5761 | 0.6027 |
+| L3 Swap Delta | N/A | +0.0210 | +0.0150 | +0.0462 | +0.0724 |
+| Vul4J Real CVEs AUC (n=14) | 0.5778 | 0.6667 | 0.8000 | N/A | 0.5222 |
 
 Note on deployment readiness:
 With `P@90R = 0.1884` on L3, catching 90% of real bugs still leaves over 81% false positives in the accepted queue.

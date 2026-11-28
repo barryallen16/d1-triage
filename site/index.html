@@ -2530,12 +2530,12 @@
       
       <div class="hero-stats">
         <div class="stat-item">
-          <div class="stat-value highlight">0.8372</div>
-          <div class="stat-label">Verified Patch L3 ROC-AUC (d1-3B zero-shot)</div>
+          <div class="stat-value highlight">0.8339</div>
+          <div class="stat-label">Verified Patch L3 ROC-AUC (Full-Method LoRA v2)</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value">0.6594</div>
-          <div class="stat-label">Same-rule L3 ROC-AUC (Contrastive LoRA)</div>
+          <div class="stat-value">0.6027</div>
+          <div class="stat-label">Same-rule L3 ROC-AUC (+0.0724 rule-swap delta)</div>
         </div>
         <div class="stat-item">
           <div class="stat-value">~12 ms</div>
@@ -3122,14 +3122,14 @@
                 </tr>
                 <tr class="highlight-row">
                   <td>
-                    <strong>Liquid AI d1-3B Contrastive LoRA</strong>
-                    <div class="t-muted" style="font-size: 0.78rem;">Completion-masked LoRA (r=8, lr=5e-5, 296 non-test pairs)</div>
+                    <strong>Liquid AI d1-3B Contrastive LoRA (v2)</strong>
+                    <div class="t-muted" style="font-size: 0.78rem;">Full-method logit-readout LoRA (1,643 methods, KL=0.2)</div>
                   </td>
-                  <td>0.7000</td>
-                  <td>0.6520</td>
-                  <td><span class="badge-champion">0.6014</span></td>
-                  <td>+0.0396</td>
-                  <td>~414 ms avg (T4 loop)</td>
+                  <td>0.5222</td>
+                  <td><span class="badge-win">0.8339</span></td>
+                  <td><span class="badge-champion">0.6027</span></td>
+                  <td>+0.0365</td>
+                  <td>~456 ms avg (T4 loop)</td>
                 </tr>
                 <tr class="highlight-row" style="background: rgba(16, 185, 129, 0.08);">
                   <td>

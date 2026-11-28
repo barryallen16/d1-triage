@@ -59,7 +59,7 @@ All numbers below come directly from [audit/evaluate_d1.py](audit/evaluate_d1.py
 | **Kev-4B** | 4B Transformer | 0.7167 | 0.5100 | +0.0180 | 0.6667 | ~85 ms (fwd) / 12.8 GB VRAM |
 | **d1-3B Zero-Shot** | 3B Hybrid SSM | **0.8372** | 0.5495 | +0.0202 | **0.8000** | ~12 ms (fwd) / 6.2 GB VRAM |
 | **d1-3B Targeted Prompt** | 3B Hybrid SSM | 0.6261 | 0.5761 | +0.0749 | N/A | 626 ms avg (full loop) |
-| **d1-3B Contrastive LoRA** | 3B Hybrid SSM | 0.6520 | 0.6014 | +0.0396 | 0.7000 | ~414 ms avg (T4 loop) |
+| **d1-3B Contrastive LoRA (v2)** | 3B Hybrid SSM | 0.8339 | **0.6027** | +0.0365 | 0.5222 | 456 ms avg (T4 loop) |
 
 *Definitions*:
 Verified Patch (L3) requires the finding line to sit inside a verified security fix hunk and match the advisory CVE CWE (28 of 174 rows).
@@ -77,9 +77,10 @@ In the GHSA set, `documentbuilderfactory-disallow-doctype-decl-missing` is 91% T
 Injecting `>>> [ALERT LINE X]` at the matched sink line forces code sensitivity, lifting L0 within-rule AUC from `0.4297` to `0.5986` and L0 swap delta to `+0.0749`, though overall L3 AUC drops to `0.6261`.
 
 Fine-tuning on synthetic Juliet cases collapsed real-world generalization (`0.449` within-rule AUC).
-Filtering out the 120 test-file rows from [audit/contrastive_train.jsonl](audit/contrastive_train.jsonl) (leaving 296 non-test rows) and training Contrastive LoRA (`r=8`, `lr=5e-5`, 2 epochs) with completion-only loss masking on `yes`/`no` plus `find_sink_line` grounding lifted Vul4J AUC from `0.5444` to `0.7000` (`P@90R = 0.5000`, beating Heuristic `0.5778` and Kev-4B `0.6667`), L3 AUC from `0.5988` to `0.6520` (`0.6014` within-rule AUC), and L2 within-rule AUC to `0.6310`.
-Remaining gap: the 296 non-test rows are still short raw diff hunks rather than full enclosing methods, which limits L0/L1 overall AUC (`0.5282` / `0.5390`).
-With `P@90R = 0.1971` on L3, the model works as a triage ranker rather than an autonomous filter.
+Naive short-hunk LoRA training (`r=16`, `lr=1e-4`, `line=0`) also degraded overall L3 AUC (`0.5988`) and Vul4J (`0.5444`).
+Building a `1,643`-row full-method dataset from `465` held-out commits ([audit/full_method_train.jsonl](audit/full_method_train.jsonl)) and training `d1-3B` with direct 2-class `yes`/`no` logit readout loss (`3x` Semgrep upweighting, `KL=0.2` base anchor, `2` epochs) lifted GHSA L3 AUC to `0.8339` (`+0.2351` over naive LoRA, beating `Kev-4B` at `0.7167`), L2 AUC to `0.7977`, L0 AUC to `0.7119`, L3 `P@90R` to `0.3023` (nearly double the heuristic's `0.1609`), and L3 swap delta to `+0.0724` (`0.6027` L3 within-rule AUC).
+A higher KL anchor (`KL=0.5`, `1` epoch) trades peak GHSA L3 AUC (`0.7083`) for stronger out-of-distribution preservation on Vul4J (`0.6889`, `P@90R = 0.5556`) and L2 within-rule discrimination (`0.6595`).
+With `P@90R = 0.3023` on L3, the model works as a triage ranker rather than an autonomous filter.
 
 ---
 

@@ -27,7 +27,7 @@ except ImportError:
 
 MODEL = "LiquidAI/d1-3B"
 WORK = Path("/content" if Path("/content").exists() else "/tmp")
-TRAIN_DATA = WORK / "contrastive_train.jsonl"
+TRAIN_DATA = WORK / "full_method_train.jsonl"
 OUT_GHSA_IDENTITY = WORK / "d1_lora_identity_ghsa.jsonl"
 OUT_GHSA_SWAP = WORK / "d1_lora_swap_ghsa.jsonl"
 OUT_VUL4J_IDENTITY = WORK / "d1_lora_identity_vul4j.jsonl"
@@ -37,7 +37,9 @@ MAX_SEQ = 1536
 BATCH = 2
 GRAD_ACCUM = 4
 EPOCHS = 2
-LR = 5e-5
+LR = 3e-5
+KL_WEIGHT = 0.2
+SEMGREP_UPWEIGHT = 3
 
 CWE_TO_SEMGREP_RULE = {
     "CWE-22": "java.lang.security.httpservlet-path-traversal.httpservlet-path-traversal",
@@ -154,24 +156,26 @@ def main():
     print(f"2. Loading training rows from {TRAIN_DATA}...", flush=True)
     all_rows = [json.loads(l) for l in open(TRAIN_DATA, encoding="utf-8") if l.strip()]
     train_rows = [r for r in all_rows if "/test/" not in r["file"].lower() and "test.java" not in r["file"].lower()]
+    if SEMGREP_UPWEIGHT > 1:
+        sg_rows = [r for r in train_rows if str(r.get("source", "")).startswith("semgrep")]
+        train_rows = train_rows + sg_rows * (SEMGREP_UPWEIGHT - 1)
     random.Random(3407).shuffle(train_rows)
-    print(f"Loaded {len(train_rows)} non-test contrastive rows (filtered {len(all_rows) - len(train_rows)} test rows)", flush=True)
+    print(f"Loaded {len(train_rows)} non-test full-method rows", flush=True)
+
+    from prompt import readout_ids
+    yes_ids, no_ids = readout_ids(tokenizer, q)
 
     def fmt(row):
         state_text = state_of_annotated(row)
         prompt = render(tokenizer=tokenizer, state=state_text, q=q, bos=tokenizer.bos_token)
-        target = "yes" if row["label"] == "TP" else "no"
         p_ids = tokenizer(prompt, add_special_tokens=False).input_ids
-        c_ids = tokenizer(target + tokenizer.eos_token, add_special_tokens=False).input_ids
-        max_p = MAX_SEQ - len(c_ids)
-        if len(p_ids) > max_p:
-            p_ids = p_ids[-max_p:]
-        input_ids = p_ids + c_ids
-        labels = [-100] * len(p_ids) + c_ids
-        return {"input_ids": input_ids, "attention_mask": [1] * len(input_ids), "labels": labels}
+        if len(p_ids) > MAX_SEQ:
+            p_ids = p_ids[-MAX_SEQ:]
+        cls_label = 0 if row["label"] == "TP" else 1
+        return {"input_ids": p_ids, "attention_mask": [1] * len(p_ids), "cls_label": cls_label}
 
     dataset = Dataset.from_list([fmt(r) for r in train_rows])
-    print(f"Rendered {len(dataset)} completion-masked training examples", flush=True)
+    print(f"Rendered {len(dataset)} logit-readout training examples (yes_ids={yes_ids}, no_ids={no_ids})", flush=True)
 
     print("3. Initializing base model with LoRA...", flush=True)
     base_model = AutoModelForImageTextToText.from_pretrained(
@@ -194,17 +198,41 @@ def main():
     peft_model = get_peft_model(base_model, lora_config)
     peft_model.print_trainable_parameters()
 
-    trainer = Trainer(
+    import torch.nn.functional as F
+
+    class LogitReadoutTrainer(Trainer):
+        def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+            cls_label = inputs.pop("cls_label")
+            with torch.no_grad():
+                with model.disable_adapter():
+                    base_logits = model(**inputs, logits_to_keep=1).logits[:, -1, :].float()
+                    base_pair = torch.stack([
+                        torch.logsumexp(base_logits[:, yes_ids], dim=-1),
+                        torch.logsumexp(base_logits[:, no_ids], dim=-1),
+                    ], dim=-1)
+                    base_probs = F.softmax(base_pair, dim=-1)
+
+            outputs = model(**inputs, logits_to_keep=1)
+            last_logits = outputs.logits[:, -1, :].float()
+            yes_l = torch.logsumexp(last_logits[:, yes_ids], dim=-1)
+            no_l = torch.logsumexp(last_logits[:, no_ids], dim=-1)
+            pair = torch.stack([yes_l, no_l], dim=-1)
+            ce_loss = F.cross_entropy(pair, cls_label.to(pair.device), label_smoothing=0.05)
+            kl_loss = F.kl_div(F.log_softmax(pair, dim=-1), base_probs, reduction="batchmean")
+            loss = (1.0 - KL_WEIGHT) * ce_loss + KL_WEIGHT * kl_loss
+            return (loss, outputs) if return_outputs else loss
+
+    trainer = LogitReadoutTrainer(
         model=peft_model,
         train_dataset=dataset,
         args=TrainingArguments(
             per_device_train_batch_size=1,
             gradient_accumulation_steps=8,
-            warmup_steps=6,
+            warmup_steps=10,
             num_train_epochs=EPOCHS,
             learning_rate=LR,
             logging_steps=10,
-            weight_decay=0.01,
+            weight_decay=0.05,
             lr_scheduler_type="cosine",
             seed=3407,
             output_dir=str(WORK / "lora_checkpoints"),
