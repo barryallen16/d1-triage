@@ -33,6 +33,7 @@ scratch/
 .gemini/
 .grok/
 .agents/
+.impeccable/
 skills-lock.json
 dist/
 build/

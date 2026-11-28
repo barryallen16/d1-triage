@@ -1,4 +1,4 @@
-"""A4: real-world gate for d1-triage scorers.
+"""Real-world gate for d1-triage scorers.
 
 Compares a scorer against the Semgrep-severity heuristic on pooled Vul4J
 findings. Passes only when the scorer clears the minimum AUC margin and does

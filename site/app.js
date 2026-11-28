@@ -576,11 +576,11 @@ Reply with yes or no only.<|im_end|>
           },
           3: {
             heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-            telemetry: "Browser AST heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
+            telemetry: "Browser keyword heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
             desc: "d1-3B executes a single forward pass over binary option heads. It scores YES (exploitable) vs NO (benign) in 10.6ms without autoregressive token generation overhead.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 45 (new File)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
+            inCode: `Target: Line 45 (new File)\nInference: Client-side keyword heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 96.8%",
             outCode: `Logit(YES)    = +3.41  [96.8%]\nLogit(NO)     = -1.82  [3.2%]\nMargin Delta  = +5.23 (Threshold > 0)\nVerdict       = EXPLOITABLE TP`
@@ -627,11 +627,11 @@ Reply with yes or no only.<|im_end|>
           },
           3: {
             heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-            telemetry: "Browser AST heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
+            telemetry: "Browser keyword heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
             desc: "d1-3B evaluates the guarded context in a single forward pass. Binary option logits decisively flip negative for vulnerability.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 28 (newDocumentBuilder)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
+            inCode: `Target: Line 28 (newDocumentBuilder)\nInference: Client-side keyword heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 3.2%",
             outCode: `Logit(YES)    = -3.40  [3.2%]\nLogit(NO)     = +3.40  [96.8%]\nMargin Delta  = -6.80 (Threshold > 0)\nVerdict       = SAFE / FP`
@@ -678,11 +678,11 @@ Reply with yes or no only.<|im_end|>
           },
           3: {
             heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-            telemetry: "Browser AST heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
+            telemetry: "Browser keyword heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
             desc: "d1-3B computes option logits in a single forward pass. High exploitability probability confirms critical command injection.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 19 (Runtime.exec)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
+            inCode: `Target: Line 19 (Runtime.exec)\nInference: Client-side keyword heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 98.4%",
             outCode: `Logit(YES)    = +4.12  [98.4%]\nLogit(NO)     = -2.10  [1.6%]\nMargin Delta  = +6.22 (Threshold > 0)\nVerdict       = CRITICAL TP`
@@ -729,11 +729,11 @@ Reply with yes or no only.<|im_end|>
           },
           3: {
             heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-            telemetry: "Browser AST heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
+            telemetry: "Browser keyword heuristic (<1ms) | Reference T4 d1-3B fwd: ~12ms",
             desc: "Single forward pass evaluates parameter binding. Logits strongly favor benign classification.",
             inLabel: "Single-Pass Prompt Context",
             inTag: "0 Tokens Decoded",
-            inCode: `Target: Line 32 (prepareStatement)\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
+            inCode: `Target: Line 32 (prepareStatement)\nInference: Client-side keyword heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop`,
             outLabel: "Confidence Score Breakdown",
             outTag: "Softmax 2.1%",
             outCode: `Logit(YES)    = -3.85  [2.1%]\nLogit(NO)     = +3.85  [97.9%]\nMargin Delta  = -7.70 (Threshold > 0)\nVerdict       = SAFE PARAMETERIZED`
@@ -807,11 +807,11 @@ Reply with yes or no only.<|im_end|>
       } else if (stationNum === 3) {
         return {
           heading: "Stage 03: Liquid AI d1-3B Inference Engine",
-          telemetry: "Elapsed: " + dyn.latency + " | Browser AST heuristic",
+          telemetry: "Elapsed: " + dyn.latency + " | Browser keyword heuristic",
           desc: "d1-3B evaluates a single forward pass over binary option heads (YES vs NO) on CPU without autoregressive token generation.",
           inLabel: "Single-Pass Prompt Context",
           inTag: "0 Tokens Decoded",
-          inCode: "Target: Line " + dyn.sinkLine + " (" + dyn.sinkStmt + ")\nInference: Client-side AST heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop",
+          inCode: "Target: Line " + dyn.sinkLine + " (" + dyn.sinkStmt + ")\nInference: Client-side keyword heuristic\nReference T4 d1-3B: ~12ms fwd / 456ms loop",
           outLabel: "Confidence Score Breakdown",
           outTag: "P(TP): " + dyn.ptp,
           outCode: "YES (expl): " + (dyn.logitYes >= 0 ? '+' : '') + dyn.logitYes + "  [" + dyn.ptp + "]\nNO  (safe): " + (dyn.logitNo >= 0 ? '+' : '') + dyn.logitNo + "  [" + dyn.pfp + "]\nMargin Δ:  " + (dyn.marginDelta >= 0 ? '+' : '') + dyn.marginDelta + "  (Threshold > 0)"

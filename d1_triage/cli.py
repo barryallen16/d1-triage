@@ -17,7 +17,6 @@ DEMO_FINDINGS = [
         message="Untrusted user input concatenated directly into File path constructor.",
         code_window="""public File getRequestedReport(String userReportName) {
     File baseDir = new File("/var/reports");
-    // Dangerous sink: userReportName can contain ../../etc/passwd
     File targetFile = new File(baseDir, userReportName);
     if (!targetFile.exists()) {
         return null;
@@ -35,13 +34,12 @@ DEMO_FINDINGS = [
         message="XML parser instantiated without secure processing features.",
         code_window="""public Document parseConfig(InputStream input) throws Exception {
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    // Guarded sink: secure processing feature is explicitly set
     dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
     dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
     DocumentBuilder db = dbf.newDocumentBuilder();
     return db.parse(input);
 }""",
-        ground_truth="FP (Safe: secure features explicitly neutralize XXE)",
+        ground_truth="FP (Safe: secure features disable external entities)",
     ),
 ]
 
@@ -126,13 +124,13 @@ def main():
         prog="d1-triage",
         description="Liquid AI d1-3B Static Analysis Alert Triage CLI (Runs on CPU and GPU)",
     )
-    parser.add_argument("--demo", action="store_true", help="Run interactive demo on two contrasting real-world findings")
+    parser.add_argument("--demo", action="store_true", help="Run built-in two-finding demo")
     parser.add_argument("--scan", type=Path, help="Path to Semgrep JSON scan output")
     parser.add_argument("--benchmark", type=str, choices=["ghsa", "vul4j"], help="Run triage on benchmark dataset sample")
     parser.add_argument("--limit", type=int, default=5, help="Number of benchmark alerts to evaluate (default: 5)")
     parser.add_argument("--cpu", action="store_true", help="Force CPU execution")
     parser.add_argument("--gpu", action="store_true", help="Force GPU execution (CUDA)")
-    parser.add_argument("--mock", action="store_true", help="Fast integration dry-run without downloading model weights")
+    parser.add_argument("--mock", action="store_true", help="Run keyword heuristic with no model download")
     parser.add_argument("--threshold", type=float, default=0.5, help="Triage probability threshold (default: 0.5)")
     parser.add_argument("--output", "-o", type=str, help="Export triage results to JSON file")
     parser.add_argument("--model", type=str, default="LiquidAI/d1-3B", help="Model name or local path")
@@ -143,7 +141,7 @@ def main():
 
     if args.demo:
         findings = DEMO_FINDINGS
-        print("\n[d1-triage] Running built-in demonstration (1 Real Exploitable TP vs 1 Guarded FP)...")
+        print("\n[d1-triage] Running built-in demo (1 TP vs 1 FP)...")
     elif args.scan:
         if not args.scan.exists():
             sys.exit(f"Scan file not found: {args.scan}")

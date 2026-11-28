@@ -206,13 +206,18 @@ th:last-child .has-tooltip:focus .tooltip-box {
   left: 0;
   right: 0;
   width: 100%;
-  background: rgba(4, 28, 61, 0.98);
-  backdrop-filter: blur(14px);
+  align-items: stretch;
+  background: #041c3d;
   border-bottom: 1px solid #15468d;
-  padding: 16px 20px;
-  gap: 10px;
+  padding: 12px 20px;
+  gap: 2px;
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6);
   z-index: 99;
+}
+
+#main-nav-links.mobile-open li a {
+  display: block;
+  padding-inline: 4px;
 }
 
 .pipeline-canvas-wrap svg path,

@@ -1,11 +1,11 @@
-"""Liquid AI d1-3B Static Analysis Alert Triage CLI Tool.
+"""Liquid AI d1-3B Static Analysis Alert Triage CLI.
 
 Usage:
-    python d1_triage.py --demo                      # Run built-in interactive demo
-    python d1_triage.py --scan semgrep.json         # Triage Semgrep scan output
-    python d1_triage.py --benchmark ghsa --limit 5  # Triage real benchmark alerts
-    python d1_triage.py --cpu                       # Force CPU execution
-    python d1_triage.py --mock                      # Integration dry-run without downloading model
+    python d1_triage.py --demo --mock
+    python d1_triage.py --scan semgrep.json --mock
+    python d1_triage.py --benchmark ghsa --limit 5 --mock
+    python d1_triage.py --cpu
+    python d1_triage.py --mock
 """
 from d1_triage.cli import main
 

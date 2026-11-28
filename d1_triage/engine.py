@@ -1,6 +1,4 @@
 """LiquidAI d1-3B Alert Triage Engine."""
-import os
-import sys
 import time
 from dataclasses import dataclass
 
@@ -70,7 +68,7 @@ def generate_explanation(finding: TriageFinding, is_exploitable: bool, sink_stmt
     if "documentbuilder" in rule_lower or "xxe" in rule_lower or "cwe-611" in cwe_lower:
         if is_exploitable:
             return f"XML parser initialized at '{sink_stmt}' without enabling FEATURE_SECURE_PROCESSING or disallowing external DTDs."
-        return f"XML parser at '{sink_stmt}' explicitly enforces secure processing features, neutralizing external entity expansion."
+        return f"XML parser at '{sink_stmt}' sets secure processing flags to block external entity expansion."
 
     if "sql" in rule_lower or "cwe-89" in cwe_lower:
         if is_exploitable:
@@ -88,12 +86,12 @@ def generate_explanation(finding: TriageFinding, is_exploitable: bool, sink_stmt
         return f"Network socket at '{sink_stmt}' operates on localhost loopback or is wrapped in TLS."
 
     if is_exploitable:
-        return f"Exploitable security sink detected at line {finding.line_number} ('{sink_stmt}') without neutralizing guards."
-    return f"Safe pattern: flagged sink at line {finding.line_number} is neutralized by defensive validation or static context."
+        return f"Security sink at line {finding.line_number} ('{sink_stmt}') has no matching guard."
+    return f"Safe pattern: flagged sink at line {finding.line_number} has a guard or static input."
 
 
 def evaluate_ast_heuristics(code_window: str, rule: str, cwe: str) -> float:
-    """Evaluate taint and sanitization heuristics on Java source when model weights are not loaded."""
+    """Score Java source with keyword guard checks when model weights are not loaded."""
     code_lower = code_window.lower()
     rule_lower = rule.lower()
     cwe_lower = cwe.lower()
@@ -155,7 +153,7 @@ class D1TriageEngine:
                 import llama_cpp
             except ImportError as exc:
                 raise RuntimeError(
-                    f"GGUF inference requires llama-cpp-python ({exc}). Pass --mock for AST heuristic scoring."
+                    f"GGUF inference requires llama-cpp-python ({exc}). Pass --mock for keyword heuristic scoring."
                 ) from exc
             self._gguf = llama_cpp.Llama(
                 model_path=self.model_name,
@@ -175,7 +173,7 @@ class D1TriageEngine:
         except ImportError as exc:
             raise RuntimeError(
                 f"Live inference requires optional model dependencies (`pip install '.[model]'`): {exc}. "
-                "Pass --mock for AST heuristic scoring."
+                "Pass --mock for keyword heuristic scoring."
             ) from exc
 
         target_device = self._requested_device or ("cuda" if torch.cuda.is_available() else "cpu")

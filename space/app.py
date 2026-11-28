@@ -35,7 +35,7 @@ PRESETS = {
     IOUtils.copy(fis, resp.getOutputStream());
 }""",
     },
-    "Path Traversal Guarded (Neutralized FP)": {
+    "Path Traversal Guarded (FP)": {
         "rule": "java.lang.security.audit.path-traversal",
         "cwe": "CWE-22",
         "line": 5,
@@ -60,7 +60,7 @@ PRESETS = {
     return db.parse(is);
 }""",
     },
-    "SQL Injection Parameterized (Neutralized FP)": {
+    "SQL Injection Parameterized (FP)": {
         "rule": "java.sql.sqli",
         "cwe": "CWE-89",
         "line": 3,
@@ -117,25 +117,25 @@ def triage_fn(code_window: str, rule: str, cwe: str, line_no: int, threshold: fl
         explanation = res.explanation
     except Exception as ex:
 
-        print(f"Inference error ({ex}), falling back to AST analyzer...")
+        print(f"Inference error ({ex}), falling back to keyword heuristic...")
         idx, stmt = find_sink_line(code_window, rule)
         elapsed = (time.time() - t0) * 1000.0
 
         has_guard = any(g in code_window for g in ["startsWith", "FEATURE_SECURE_PROCESSING", "PreparedStatement", "Validat"])
         p_tp_val = 0.08 if has_guard else 0.94
         verdict = "FALSE POSITIVE" if has_guard else "TRUE POSITIVE"
-        verdict_str = f"{verdict} (NEUTRALIZED)" if has_guard else f"{verdict} (EXPLOITABLE)"
+        verdict_str = f"{verdict} (GUARDED)" if has_guard else f"{verdict} (EXPLOITABLE)"
         p_tp = f"{p_tp_val:.4f}"
         conf = f"{max(p_tp_val, 1-p_tp_val)*100:.1f}%"
         sink = f"Line {idx+1}: {stmt}"
-        explanation = f"Analyzed sink statement '{stmt}'. Neutralization guard check: {'Guarded' if has_guard else 'Unguarded'}."
+        explanation = f"Sink statement '{stmt}'. Guard check: {'Guarded' if has_guard else 'Unguarded'}."
         latency = f"{elapsed:.1f} ms"
         return verdict_str, p_tp, conf, sink, explanation, latency
 
     if "TRUE" in verdict:
-        verdict_badge = f"TRUE POSITIVE (EXPLOITABLE)"
+        verdict_badge = "TRUE POSITIVE (EXPLOITABLE)"
     else:
-        verdict_badge = f"FALSE POSITIVE (NEUTRALIZED)"
+        verdict_badge = "FALSE POSITIVE (GUARDED)"
 
     return verdict_badge, p_tp, conf, sink, explanation, latency
 
@@ -150,22 +150,11 @@ def load_preset(preset_key: str):
     )
 
 
-custom_css = """
-.verdict-box {
-    font-size: 1.25rem !important;
-    font-weight: 700 !important;
-}
-.stat-box {
-    border-radius: 8px;
-    padding: 10px;
-}
-"""
-
 with gr.Blocks(title="d1-triage - Java SAST Alert Triage") as demo:
     gr.Markdown(
         """
         # d1-triage - Static analysis alert triage
-        Sink-line grounding and AST heuristic fallback for Java security alerts.
+        Sink-line grounding and keyword heuristic fallback for Java security alerts.
         """
     )
 
@@ -223,7 +212,7 @@ with gr.Blocks(title="d1-triage - Java SAST Alert Triage") as demo:
                 latency_output = gr.Textbox(label="Inference Latency", interactive=False)
             sink_output = gr.Textbox(label="Grounded Sink Statement", interactive=False)
             explanation_output = gr.TextArea(
-                label="Remediation Guidance & Context",
+                label="Explanation",
                 interactive=False,
                 lines=5,
             )

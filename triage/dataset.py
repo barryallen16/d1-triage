@@ -1,4 +1,4 @@
-"""Phase 0/1: join Semgrep alerts to benchmark ground truth and build triage rows.
+"""Join Semgrep alerts to benchmark ground truth and build triage rows.
 
 The window is the enclosing method plus the class declaration and imports, not a
 fixed line window: in Juliet the bad() and good() methods sit next to each other,

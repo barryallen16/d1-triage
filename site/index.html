@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
-  <title>d1-triage - Real-World Java Static Analysis Alert Triage</title>
+  <title>d1-triage - Java static analysis alert triage</title>
   <meta name="description" content="Benchmarking Semgrep SAST alert triage in Java using Liquid AI d1-3B. 0.8339 L3 ROC-AUC with full-method Contrastive LoRA v2 on 174 GHSA and 14 Vul4J alerts.">
   <link rel="icon" type="image/svg+xml" href="d1.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,24 +16,24 @@
 
   <header class="sticky top-0 z-50 border-b border-border bg-bg/95 backdrop-blur-md">
     <div class="mx-auto flex h-16 max-w-[1140px] items-center justify-between px-6">
-      <a href="#" class="flex items-center gap-2.5 text-[1.05rem] font-bold tracking-tight text-white no-underline">
+      <a href="#" class="flex items-center gap-2.5 py-2.5 text-[1.05rem] font-bold tracking-tight text-white no-underline">
         <img src="d1.svg" alt="d1 logo" class="block h-[22px] w-auto shrink-0" width="28" height="22">
         <span>d1-triage</span>
         <span class="hidden rounded border border-border bg-subtle px-1.5 py-0.5 font-mono text-xs font-medium text-muted sm:inline-block">LiquidAI d1-3B</span>
       </a>
       <ul id="main-nav-links" class="hidden list-none items-center gap-7 md:flex">
-        <li><a href="#playground" onclick="closeMobileNav()" class="text-sm font-medium text-muted transition-colors hover:text-white">Interactive Playground</a></li>
-        <li><a href="#benchmark" onclick="closeMobileNav()" class="text-sm font-medium text-muted transition-colors hover:text-white">Benchmarks</a></li>
-        <li><a href="#architecture" onclick="closeMobileNav()" class="text-sm font-medium text-muted transition-colors hover:text-white">How It Works</a></li>
-        <li><a href="#quickstart" onclick="closeMobileNav()" class="text-sm font-medium text-muted transition-colors hover:text-white">CLI Quickstart</a></li>
-        <li><a href="#artifacts" onclick="closeMobileNav()" class="text-sm font-medium text-muted transition-colors hover:text-white">Artifacts</a></li>
+        <li><a href="#playground" onclick="closeMobileNav()" class="inline-block py-3 text-sm font-medium text-muted transition-colors hover:text-white">Interactive Playground</a></li>
+        <li><a href="#benchmark" onclick="closeMobileNav()" class="inline-block py-3 text-sm font-medium text-muted transition-colors hover:text-white">Benchmarks</a></li>
+        <li><a href="#architecture" onclick="closeMobileNav()" class="inline-block py-3 text-sm font-medium text-muted transition-colors hover:text-white">How It Works</a></li>
+        <li><a href="#quickstart" onclick="closeMobileNav()" class="inline-block py-3 text-sm font-medium text-muted transition-colors hover:text-white">CLI Quickstart</a></li>
+        <li><a href="#artifacts" onclick="closeMobileNav()" class="inline-block py-3 text-sm font-medium text-muted transition-colors hover:text-white">Artifacts</a></li>
       </ul>
       <div class="flex items-center gap-3">
-        <a href="https://github.com/barryallen16/d1-triage" target="_blank" rel="noreferrer" aria-label="Star d1-triage on GitHub" class="inline-flex items-center gap-2 rounded-lg bg-pink px-3.5 py-2 text-sm font-bold text-bg transition hover:bg-pink-hover hover:text-white active:scale-95">
+        <a href="https://github.com/barryallen16/d1-triage" target="_blank" rel="noreferrer" aria-label="Star d1-triage on GitHub" class="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg bg-pink px-3.5 py-3 text-sm font-bold text-bg transition hover:bg-pink-hover hover:text-white active:scale-95">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           <span class="hidden sm:inline">Star on GitHub</span>
         </a>
-        <button type="button" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" onclick="toggleMobileNav()" class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-border bg-surface text-white transition hover:border-sky-400 hover:bg-subtle md:hidden">
+        <button type="button" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" onclick="toggleMobileNav()" class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg border border-border bg-surface text-white transition hover:border-sky-400 hover:bg-subtle md:hidden">
           <svg class="icon-menu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           <svg class="icon-close hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -50,7 +50,7 @@
         Static analysis scanners flag real bugs alongside 70%+ false positives. d1-triage benchmarks Liquid AI d1-3B with statement-level sink grounding on 174 GHSA and 14 Vul4J alerts to surface real vulnerabilities first.
       </p>
       <p class="mb-7 max-w-[65ch] text-sm leading-normal text-dim">
-        Built for Java engineers and AppSec teams sorting through noisy Semgrep findings in PRs and CI.
+        For Java engineers and AppSec teams sorting noisy Semgrep findings in PRs and CI.
       </p>
 
       <div class="mb-12 flex flex-wrap items-center gap-4">
@@ -59,12 +59,12 @@
         </a>
         <div class="flex max-w-full items-center gap-2.5 rounded-lg border border-border bg-surface px-2.5 py-1.5 font-mono text-xs sm:text-sm">
           <div class="flex shrink-0 items-center gap-0.5 rounded-md border border-white/10 bg-black/30 p-0.5" role="tablist" aria-label="Package manager selection">
-            <button type="button" class="pkg-tab active cursor-pointer rounded px-2 py-0.5 font-mono text-xs font-semibold text-dim transition hover:text-white" role="tab" aria-selected="true" aria-controls="hero-install-cmd" id="tab-hero-uv" onclick="switchInstallTab('uv')">uv</button>
-            <button type="button" class="pkg-tab cursor-pointer rounded px-2 py-0.5 font-mono text-xs font-semibold text-dim transition hover:text-white" role="tab" aria-selected="false" aria-controls="hero-install-cmd" id="tab-hero-pip" onclick="switchInstallTab('pip')">pip</button>
+            <button type="button" class="pkg-tab active cursor-pointer rounded inline-flex min-h-11 min-w-11 items-center justify-center px-3 font-mono text-xs font-semibold text-dim transition hover:text-white" role="tab" aria-selected="true" aria-controls="hero-install-cmd" id="tab-hero-uv" onclick="switchInstallTab('uv')">uv</button>
+            <button type="button" class="pkg-tab cursor-pointer rounded inline-flex min-h-11 min-w-11 items-center justify-center px-3 font-mono text-xs font-semibold text-dim transition hover:text-white" role="tab" aria-selected="false" aria-controls="hero-install-cmd" id="tab-hero-pip" onclick="switchInstallTab('pip')">pip</button>
           </div>
           <span class="shrink-0 select-none text-dim">$</span>
-          <code class="overflow-x-auto whitespace-nowrap text-white" id="hero-install-cmd">uv tool install git+https://github.com/barryallen16/d1-triage.git</code>
-          <button type="button" id="hero-copy-btn" onclick="copyHeroInstall()" aria-label="Copy install command to clipboard" class="shrink-0 cursor-pointer rounded-md border border-border bg-subtle px-2.5 py-1 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
+          <code class="min-w-0 overflow-x-auto break-all text-white sm:whitespace-nowrap sm:break-normal" id="hero-install-cmd">uv tool install git+https://github.com/barryallen16/d1-triage.git</code>
+          <button type="button" id="hero-copy-btn" onclick="copyHeroInstall()" aria-label="Copy install command to clipboard" class="shrink-0 cursor-pointer rounded-md border border-border bg-subtle min-h-11 px-3 py-2 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
             <span>Copy</span>
           </button>
         </div>
@@ -72,7 +72,7 @@
 
       <div class="grid grid-cols-1 gap-4 border-t border-border pt-8 sm:grid-cols-2 lg:grid-cols-4">
         <div class="flex flex-col gap-1">
-          <div class="tabular-nums text-3xl font-bold tracking-tight text-dim">0.8339</div>
+          <div class="tabular-nums text-3xl font-bold tracking-tight text-white">0.8339</div>
           <div class="text-sm leading-snug text-dim">Verified Patch L3 ROC-AUC (Full-Method LoRA v2)</div>
         </div>
         <div class="flex flex-col gap-1">
@@ -91,51 +91,51 @@
     </div>
   </section>
 
-  <section class="border-t border-border py-14 sm:py-18" id="playground">
+  <section class="border-t border-border pt-16 pb-16 sm:pt-20 sm:pb-20" id="playground">
     <span id="workflow" class="relative -top-20 block"></span>
     <div class="mx-auto max-w-[1140px] px-6">
       <div class="mb-5">
-        <h2 class="mb-2 text-2xl font-bold tracking-tight sm:text-3xl">Interactive Triage Preview (Client-Side AST Heuristics)</h2>
+        <h2 class="mb-2 text-2xl font-bold tracking-tight sm:text-3xl">Interactive triage preview (client-side heuristics)</h2>
         <p class="max-w-[72ch] text-base text-muted">
-          Pick a preset or edit the Java snippet to see sink grounding and guard checks run in your browser. This web preview uses lightweight AST heuristics; run the scripts in <code class="font-mono text-dim">audit/</code> for d1-3B logit scoring.
+          Pick a preset or edit the Java snippet to see sink grounding and guard checks run in your browser. This web preview uses lightweight keyword heuristics; run the scripts in <code class="font-mono text-dim">audit/</code> for d1-3B logit scoring.
         </p>
       </div>
 
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-4">
-        <div class="grid flex-1 grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-          <button type="button" class="preset-btn active flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm font-medium text-muted transition hover:bg-subtle hover:text-white" id="btn-scen-pt" onclick="loadScenario('pt', this)">
+      <div class="mb-3 flex flex-col gap-3">
+        <div class="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+          <button type="button" class="preset-btn active flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-3 text-sm font-medium text-muted transition hover:bg-subtle hover:text-white" id="btn-scen-pt" onclick="loadScenario('pt', this)">
             <span class="h-2 w-2 shrink-0 rounded-full bg-red-500"></span>
-            <span class="truncate">1. Path Traversal (CWE-22)</span>
+            <span class="min-w-0">1. Path Traversal (CWE-22)</span>
             <span class="ml-auto shrink-0 rounded border border-red-500/25 bg-red-500/15 px-1.5 py-0.5 font-mono text-xs font-bold text-red-400">TP</span>
           </button>
-          <button type="button" class="preset-btn flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm font-medium text-muted transition hover:bg-subtle hover:text-white" id="btn-scen-xxe" onclick="loadScenario('xxe', this)">
+          <button type="button" class="preset-btn flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-3 text-sm font-medium text-muted transition hover:bg-subtle hover:text-white" id="btn-scen-xxe" onclick="loadScenario('xxe', this)">
             <span class="h-2 w-2 shrink-0 rounded-full bg-emerald-500"></span>
-            <span class="truncate">2. XML Entity (CWE-611)</span>
+            <span class="min-w-0">2. XML Entity (CWE-611)</span>
             <span class="ml-auto shrink-0 rounded border border-emerald-500/25 bg-emerald-500/15 px-1.5 py-0.5 font-mono text-xs font-bold text-emerald-400">FP</span>
           </button>
-          <button type="button" class="preset-btn flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm font-medium text-muted transition hover:bg-subtle hover:text-white" id="btn-scen-cmdi" onclick="loadScenario('cmdi', this)">
+          <button type="button" class="preset-btn flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-3 text-sm font-medium text-muted transition hover:bg-subtle hover:text-white" id="btn-scen-cmdi" onclick="loadScenario('cmdi', this)">
             <span class="h-2 w-2 shrink-0 rounded-full bg-red-500"></span>
-            <span class="truncate">3. Command Injection (CWE-78)</span>
+            <span class="min-w-0">3. Command Injection (CWE-78)</span>
             <span class="ml-auto shrink-0 rounded border border-red-500/25 bg-red-500/15 px-1.5 py-0.5 font-mono text-xs font-bold text-red-400">TP</span>
           </button>
-          <button type="button" class="preset-btn flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm font-medium text-muted transition hover:bg-subtle hover:text-white" id="btn-scen-sqli" onclick="loadScenario('sqli', this)">
+          <button type="button" class="preset-btn flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3.5 py-3 text-sm font-medium text-muted transition hover:bg-subtle hover:text-white" id="btn-scen-sqli" onclick="loadScenario('sqli', this)">
             <span class="h-2 w-2 shrink-0 rounded-full bg-emerald-500"></span>
-            <span class="truncate">4. SQL Parameterized (CWE-89)</span>
+            <span class="min-w-0">4. SQL Parameterized (CWE-89)</span>
             <span class="ml-auto shrink-0 rounded border border-emerald-500/25 bg-emerald-500/15 px-1.5 py-0.5 font-mono text-xs font-bold text-emerald-400">FP</span>
           </button>
         </div>
         <div class="flex items-center gap-2.5">
-          <button type="button" id="btn-run-triage" onclick="triggerLiveTriageTrace()" class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-pink px-5 py-2.5 text-sm font-bold text-bg transition hover:bg-pink-hover hover:text-white active:scale-95">
+          <button type="button" id="btn-run-triage" onclick="triggerLiveTriageTrace()" class="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-pink px-5 py-3 text-sm font-bold text-bg transition hover:bg-pink-hover hover:text-white active:scale-95">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             <span id="btn-run-text">Run Live Pipeline</span>
           </button>
-          <button type="button" onclick="resetCurrentScenario()" class="cursor-pointer rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-muted transition hover:bg-subtle hover:text-white active:scale-95">
+          <button type="button" onclick="resetCurrentScenario()" class="cursor-pointer rounded-lg border border-border bg-surface px-4 py-3 text-sm text-muted transition hover:bg-subtle hover:text-white active:scale-95">
             Reset Snippet
           </button>
         </div>
       </div>
 
-      <div class="mb-4 rounded-xl border border-border/60 bg-surface/40 px-4 py-4 sm:px-5">
+      <div class="mb-5">
         <div class="mb-2.5 flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-2">
             <span class="h-1.5 w-1.5 rounded-full bg-pink"></span>
@@ -148,35 +148,35 @@
 
         <div id="hairline-pipeline-stage" class="pipeline-canvas-wrap relative aspect-[900/290] w-full cursor-pointer overflow-hidden rounded-lg border border-border bg-[#04142b]" title="Interactive Triage Pipeline"></div>
 
-        <div class="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div class="pipeline-station-pill active relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface px-3 py-2.5 transition" id="pst-1" onclick="switchPipelineStation(1)">
+        <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div class="pipeline-station-pill active relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface p-3.5 transition" id="pst-1" onclick="switchPipelineStation(1)">
             <div class="flex items-center justify-between">
               <span class="font-mono text-xs font-bold text-pink">STATION 01</span>
-              <span class="tabular-nums rounded bg-accent/45 px-1.5 py-0.5 font-mono text-xs text-dim">0.8ms</span>
+              <span class="tabular-nums rounded bg-accent/45 px-2 py-0.5 font-mono text-xs text-dim">0.8ms</span>
             </div>
             <div class="text-sm font-bold text-white">1. Sink Grounding</div>
           </div>
 
-          <div class="pipeline-station-pill relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface px-3 py-2.5 transition" id="pst-2" onclick="switchPipelineStation(2)">
+          <div class="pipeline-station-pill relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface p-3.5 transition" id="pst-2" onclick="switchPipelineStation(2)">
             <div class="flex items-center justify-between">
               <span class="font-mono text-xs font-bold text-pink">STATION 02</span>
-              <span class="tabular-nums rounded bg-accent/45 px-1.5 py-0.5 font-mono text-xs text-dim">1.2ms</span>
+              <span class="tabular-nums rounded bg-accent/45 px-2 py-0.5 font-mono text-xs text-dim">1.2ms</span>
             </div>
             <div class="text-sm font-bold text-white">2. Invariant Sieve</div>
           </div>
 
-          <div class="pipeline-station-pill relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface px-3 py-2.5 transition" id="pst-3" onclick="switchPipelineStation(3)">
+          <div class="pipeline-station-pill relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface p-3.5 transition" id="pst-3" onclick="switchPipelineStation(3)">
             <div class="flex items-center justify-between">
               <span class="font-mono text-xs font-bold text-pink">STATION 03</span>
-              <span class="tabular-nums rounded bg-accent/45 px-1.5 py-0.5 font-mono text-xs text-dim">&lt;1ms (JS)</span>
+              <span class="tabular-nums rounded bg-accent/45 px-2 py-0.5 font-mono text-xs text-dim">&lt;1ms (JS)</span>
             </div>
             <div class="text-sm font-bold text-white">3. Heuristic / Model Score</div>
           </div>
 
-          <div class="pipeline-station-pill relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface px-3 py-2.5 transition" id="pst-4" onclick="switchPipelineStation(4)">
+          <div class="pipeline-station-pill relative flex cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface p-3.5 transition" id="pst-4" onclick="switchPipelineStation(4)">
             <div class="flex items-center justify-between">
               <span class="font-mono text-xs font-bold text-pink">STATION 04</span>
-              <span class="tabular-nums rounded bg-accent/45 px-1.5 py-0.5 font-mono text-xs text-dim">Instant</span>
+              <span class="tabular-nums rounded bg-accent/45 px-2 py-0.5 font-mono text-xs text-dim">Instant</span>
             </div>
             <div class="text-sm font-bold text-white" id="pst-4-name">4. Triage Fork: Dispatch</div>
           </div>
@@ -191,7 +191,7 @@
               <span class="truncate rounded border border-border bg-subtle px-1.5 py-0.5 text-dim" id="p-rule">java.lang.security.audit.path-traversal</span>
               <span class="rounded border border-border bg-subtle px-1.5 py-0.5 text-dim" id="p-cwe">CWE-22</span>
             </div>
-            <span class="text-slate-400" id="p-backend-indicator"><svg width="10" height="10" viewBox="0 0 24 24" fill="#38bdf8" class="mr-1.5 inline align-[-1px]"><circle cx="12" cy="12" r="10"/></svg>In-Browser Live Demo</span>
+            <span class="inline-flex items-center gap-1.5 text-slate-400" id="p-backend-indicator"><svg width="10" height="10" viewBox="0 0 24 24" fill="#38bdf8" class="shrink-0"><circle cx="12" cy="12" r="10"/></svg>In-Browser Live Demo</span>
           </div>
           <textarea class="min-h-[230px] w-full resize-y rounded-lg border border-border bg-[#090d14] px-4 py-3.5 font-mono text-xs leading-relaxed text-slate-300 outline-none focus:border-pink focus:ring-1 focus:ring-pink" id="p-code" spellcheck="false" placeholder="Type, paste, or modify any Java method snippet here to triage dynamically..."></textarea>
           <div class="text-xs text-dim">
@@ -199,9 +199,9 @@
           </div>
         </div>
 
-        <div class="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-[#051e44] p-4 sm:p-5">
+        <div class="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-[#051e44] p-5">
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <div class="verdict-pill verdict-tp inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 font-mono text-xs font-bold" id="p-verdict">
+            <div class="verdict-pill verdict-tp inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-2 font-mono text-xs font-bold" id="p-verdict">
               <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
               <span id="p-verdict-text">EXPLOITABLE (TRUE POSITIVE)</span>
             </div>
@@ -219,25 +219,25 @@
           </div>
 
           <div class="border-t border-border pt-3" id="pipeline-dock">
-            <div class="mb-1.5 flex items-center justify-between gap-2">
-              <div class="flex items-center gap-2 text-xs font-semibold text-white">
-                <span class="h-1.5 w-1.5 rounded-full bg-pink" id="dock-dot"></span>
+            <div class="mb-1.5 flex items-start justify-between gap-2">
+              <div class="flex min-w-0 flex-1 items-center gap-2 text-xs font-semibold text-white">
+                <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-pink" id="dock-dot"></span>
                 <span id="dock-heading">Stage 01: Statement Sink Grounding in Java AST</span>
               </div>
-              <span class="tabular-nums shrink-0 rounded bg-accent/40 px-2 py-0.5 font-mono text-xs text-dim" id="dock-telemetry">Elapsed: 0.8ms</span>
+              <span class="tabular-nums max-w-[52%] shrink-0 rounded bg-accent/40 px-2.5 py-1 text-right font-mono text-[11px] leading-snug text-dim sm:text-xs" id="dock-telemetry">Elapsed: 0.8ms</span>
             </div>
             <p class="mb-2 text-xs leading-snug text-muted" id="dock-desc">
               d1-triage extracts the enclosing method AST and injects &gt;&gt;&gt; [ALERT LINE] directly onto the dangerous sink statement.
             </p>
-            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div class="overflow-hidden rounded-md border border-white/10 bg-slate-900/60 px-3 py-2.5">
+            <div class="grid grid-cols-1 gap-3 border-t border-border/60 pt-3 sm:grid-cols-2">
+              <div class="border-l-2 border-dim/40 pl-3">
                 <div class="mb-1.5 flex items-center justify-between text-xs">
                   <span id="dock-in-label" class="font-semibold text-slate-200">Inbound SAST Finding</span>
                   <span class="font-mono text-xs text-dim" id="dock-in-tag">JSON Alert</span>
                 </div>
                 <pre class="m-0 overflow-hidden whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-dim" id="dock-code-input"></pre>
               </div>
-              <div class="overflow-hidden rounded-md border border-white/10 bg-slate-900/60 px-3 py-2.5">
+              <div class="border-l-2 border-pink/40 pl-3">
                 <div class="mb-1.5 flex items-center justify-between text-xs">
                   <span id="dock-out-label" class="font-semibold text-slate-200">Engine Transformation Artifact</span>
                   <span class="font-mono text-xs text-pink" id="dock-out-tag">Anchored Method</span>
@@ -256,12 +256,12 @@
     </div>
   </section>
 
-  <section class="border-t border-border py-14 sm:py-18" id="benchmark">
+  <section class="border-t border-border pt-16 pb-16 sm:pt-20 sm:pb-20" id="benchmark">
     <div class="mx-auto max-w-[1140px] px-6">
       <div class="mb-9">
-        <h2 class="mb-3 text-2xl font-bold tracking-tight sm:text-3xl">Benchmark Leaderboard: Real-World Triage</h2>
+        <h2 class="mb-3 text-2xl font-bold tracking-tight sm:text-3xl">Benchmark leaderboard</h2>
         <p class="max-w-[72ch] text-base text-muted">
-          Evaluated on 174 real-world Java alerts across 68 GitHub advisories and 14 alerts across 126 Vul4J repositories. Every metric is tested with paired rule-swap controls to catch models cheating via rule-name priors.
+          Evaluated on 174 real-world Java alerts across 68 GitHub advisories and 14 alerts across 126 Vul4J repositories. Each metric has a paired rule-swap control, so a model that scores high on rule names alone shows no gain.
         </p>
       </div>
 
@@ -310,28 +310,28 @@
           <div class="flex flex-col gap-1.5">
             <div class="tabular-nums text-4xl font-bold tracking-tight text-white">2.87 GB</div>
             <div class="text-sm font-semibold text-slate-200">d1-3B Q8_0 GGUF Weights</div>
-            <div class="text-xs leading-normal text-muted">CLI --mock runs local AST heuristics offline; GGUF scoring runs via llama-cpp-python.</div>
+            <div class="text-xs leading-normal text-muted">CLI --mock runs local keyword heuristics offline; GGUF scoring runs via llama-cpp-python.</div>
           </div>
         </div>
       </div>
 
       <div class="mb-7 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div class="flex flex-col gap-2 rounded-lg border border-border bg-surface p-5">
-          <h3 class="text-lg font-bold text-white">Within-Rule Discrimination</h3>
+          <h3 class="text-lg font-bold text-white">Within-rule discrimination</h3>
           <p class="text-xs leading-relaxed text-muted">
             Can the model separate vulnerable functions from fixed ones when both match the same Semgrep rule? Static scanner rules score 0.5000 (random coin flip) because they fire on both. Contrastive LoRA v2 reaches 0.6027 L3 within-rule AUC by checking guards in the code.
           </p>
         </div>
 
         <div class="flex flex-col gap-2 rounded-lg border border-border bg-surface p-5">
-          <h3 class="text-lg font-bold text-white">Verified Security Patches</h3>
+          <h3 class="text-lg font-bold text-white">Verified security patches</h3>
           <p class="text-xs leading-relaxed text-muted">
             Location-proxy labels (L0) count any alert in a modified file or method, mixing tests and refactoring noise into true positives. Verified patch labels (L3) require the alert line to sit inside the security fix diff and match the advisory CVE CWE.
           </p>
         </div>
 
         <div class="flex flex-col gap-2 rounded-lg border border-border bg-surface p-5">
-          <h3 class="text-lg font-bold text-white">Vul4J Census Check</h3>
+          <h3 class="text-lg font-bold text-white">Vul4J census check</h3>
           <p class="text-xs leading-relaxed text-muted">
             Evaluated across 126 Java repositories (14 Semgrep alerts: 5 TP, 9 FP across 10 CVEs). Zero-shot d1-3B scores 0.8000 AUC, while Contrastive LoRA v2 scores 0.5222 because the 465 training commits lack crypto and SSL rules.
           </p>
@@ -341,13 +341,13 @@
       <div class="mb-7 rounded-xl border border-border bg-surface p-6">
         <div class="mb-5 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
           <div>
-            <h3 class="mb-1 text-lg font-bold text-white">Head-to-Head Benchmark Comparison</h3>
+            <h3 class="mb-1 text-lg font-bold text-white">Head-to-head comparison</h3>
             <p class="text-xs text-muted">Compare measured loop speed, L3 same-rule discrimination, and GHSA Verified Patch AUC across evaluated setups.</p>
           </div>
           <div class="inline-flex flex-wrap gap-1 rounded-lg border border-border bg-[#090d14] p-1">
-            <button type="button" class="bench-toggle-btn active cursor-pointer rounded-md px-3.5 py-1.5 text-xs font-medium text-muted transition hover:text-white" id="btn-comp-latency" onclick="switchComparisonMetric('latency')">Decision Latency</button>
-            <button type="button" class="bench-toggle-btn cursor-pointer rounded-md px-3.5 py-1.5 text-xs font-medium text-muted transition hover:text-white" id="btn-comp-auc" onclick="switchComparisonMetric('auc')">Within-Rule AUC</button>
-            <button type="button" class="bench-toggle-btn cursor-pointer rounded-md px-3.5 py-1.5 text-xs font-medium text-muted transition hover:text-white" id="btn-comp-hw" onclick="switchComparisonMetric('hw')">Verified Patch AUC (L3)</button>
+            <button type="button" class="bench-toggle-btn active cursor-pointer rounded-md min-h-11 px-3.5 py-1.5 text-xs font-medium text-muted transition hover:text-white" id="btn-comp-latency" onclick="switchComparisonMetric('latency')">Decision Latency</button>
+            <button type="button" class="bench-toggle-btn cursor-pointer rounded-md min-h-11 px-3.5 py-1.5 text-xs font-medium text-muted transition hover:text-white" id="btn-comp-auc" onclick="switchComparisonMetric('auc')">Within-Rule AUC</button>
+            <button type="button" class="bench-toggle-btn cursor-pointer rounded-md min-h-11 px-3.5 py-1.5 text-xs font-medium text-muted transition hover:text-white" id="btn-comp-hw" onclick="switchComparisonMetric('hw')">Verified Patch AUC (L3)</button>
           </div>
         </div>
 
@@ -384,24 +384,9 @@
             </div>
           </div>
 
-          <div class="flex flex-col gap-2">
-            <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
-              <span class="flex items-center gap-2 font-semibold text-white">
-                <strong>d1-3B 50/50 Ensemble</strong>
-                <span class="rounded border border-border bg-subtle px-1.5 py-0.5 font-mono text-xs text-muted">Prompt + LoRA Blend</span>
-              </span>
-              <div class="flex items-center gap-2">
-                <span class="tabular-nums font-mono text-sm font-bold text-white">~1.08 s loop</span>
-                <span class="rounded border border-red-500/25 bg-red-500/15 px-1.5 py-0.5 font-mono text-xs font-semibold text-red-400">2 Forward Passes</span>
-              </div>
-            </div>
-            <div class="h-2.5 overflow-hidden rounded-full border border-white/5 bg-subtle">
-              <div class="h-full rounded-full bg-gradient-to-r from-red-600 to-red-400" style="width: 100%;"></div>
-            </div>
-          </div>
 
           <div class="mt-2 border-t border-dashed border-border pt-2 text-xs text-dim">
-            <strong>Single-pass logit readout:</strong> d1-3B evaluates yes/no logits on the final token position in one forward pass (output_tokens = 0). Measured loop times come from per-row timing recorded on T4 GPU.
+            d1-3B compares yes/no logits at the final token position in one forward pass (output_tokens = 0). Loop times are per-row timings recorded on a T4 GPU.
           </div>
         </div>
 
@@ -455,7 +440,7 @@
           </div>
 
           <div class="mt-2 border-t border-dashed border-border pt-2 text-xs text-dim">
-            <strong>Why within-rule checks matter:</strong> Static scanners fire on both vulnerable methods and patched commits sharing the same rule. A model using rule names alone scores 0.5000. Contrastive LoRA v2 holds +0.0724 L3 swap delta on GHSA.
+            Static scanners fire on vulnerable methods and patched commits under the same rule, so a model that reads only rule names scores 0.5000. Contrastive LoRA v2 holds a +0.0724 L3 swap delta on GHSA.
           </div>
         </div>
 
@@ -509,29 +494,29 @@
           </div>
 
           <div class="mt-2 border-t border-dashed border-border pt-2 text-xs text-dim">
-            <strong>Triage ranker limit:</strong> Even at 0.8339 L3 AUC, P@90R is 0.3023 (catch 90% of verified bugs and roughly 70% of queued items remain false alarms), so d1-triage ranks queues for human review.
+            At 0.8339 L3 AUC, P@90R is still 0.3023: catching 90% of verified bugs leaves roughly 70% of the queue as false alarms, so d1-triage ranks a queue for human review.
           </div>
         </div>
       </div>
 
-      <div class="overflow-hidden rounded-xl border border-border bg-surface">
-        <div class="flex gap-2 overflow-x-auto border-b border-border bg-subtle px-3 py-1.5" role="tablist" aria-label="Benchmark leaderboard views">
-          <button type="button" role="tab" aria-selected="true" class="bench-table-tab active inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-transparent px-4 py-2 text-sm font-medium text-muted transition hover:bg-white/5 hover:text-white" id="tab-btn-summary" tabindex="0" onclick="switchBenchTab('summary')">
+      <div class="rounded-xl border border-border bg-surface p-4 sm:p-5">
+        <div class="mb-3 flex gap-2 overflow-x-auto border-b border-border pb-3" role="tablist" aria-label="Benchmark leaderboard views">
+          <button type="button" role="tab" aria-selected="true" class="bench-table-tab active inline-flex shrink-0 cursor-pointer items-center gap-2 min-h-11 whitespace-nowrap rounded-md border border-transparent px-4 py-2 text-sm font-medium text-muted transition hover:bg-white/5 hover:text-white" id="tab-btn-summary" tabindex="0" onclick="switchBenchTab('summary')">
             <span>Tab 1: Summary Leaderboard</span>
             <span class="rounded bg-blue-600/15 px-1.5 py-0.5 font-mono text-xs text-dim">Model Comparison</span>
           </button>
-          <button type="button" role="tab" aria-selected="false" class="bench-table-tab inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-transparent px-4 py-2 text-sm font-medium text-muted transition hover:bg-white/5 hover:text-white" id="tab-btn-vul4j" tabindex="-1" onclick="switchBenchTab('vul4j')">
+          <button type="button" role="tab" aria-selected="false" class="bench-table-tab inline-flex shrink-0 cursor-pointer items-center gap-2 min-h-11 whitespace-nowrap rounded-md border border-transparent px-4 py-2 text-sm font-medium text-muted transition hover:bg-white/5 hover:text-white" id="tab-btn-vul4j" tabindex="-1" onclick="switchBenchTab('vul4j')">
             <span>Tab 2: Vul4J Breakdown</span>
             <span class="rounded bg-blue-600/15 px-1.5 py-0.5 font-mono text-xs text-dim">14 Alerts</span>
           </button>
-          <button type="button" role="tab" aria-selected="false" class="bench-table-tab inline-flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap rounded-md border border-transparent px-4 py-2 text-sm font-medium text-muted transition hover:bg-white/5 hover:text-white" id="tab-btn-ghsa" tabindex="-1" onclick="switchBenchTab('ghsa')">
+          <button type="button" role="tab" aria-selected="false" class="bench-table-tab inline-flex shrink-0 cursor-pointer items-center gap-2 min-h-11 whitespace-nowrap rounded-md border border-transparent px-4 py-2 text-sm font-medium text-muted transition hover:bg-white/5 hover:text-white" id="tab-btn-ghsa" tabindex="-1" onclick="switchBenchTab('ghsa')">
             <span>Tab 3: GHSA Label Levels</span>
             <span class="rounded bg-blue-600/15 px-1.5 py-0.5 font-mono text-xs text-dim">68 CVEs (174 Rows)</span>
           </button>
         </div>
 
         <div class="bench-tab-content active" id="tab-summary" role="tabpanel" aria-labelledby="tab-btn-summary" tabindex="0">
-          <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tab 1: Comprehensive Summary Model Comparison">
+          <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tab 1: Summary model comparison">
             <table class="w-full border-collapse text-left text-sm">
               <thead class="sticky top-0 z-10">
                 <tr class="border-b border-border bg-subtle text-xs font-semibold uppercase tracking-wider text-dim">
@@ -565,9 +550,9 @@
                   </th>
                   <th class="px-4 py-3.5">
                     <span class="has-tooltip">
-                      Code Signal Delta
+                      L0 Swap Delta
                       <i class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xs font-bold not-italic leading-none text-dim">?</i>
-                      <span class="tooltip-box">AUC change when swapping code windows behind identical rules. Positive delta proves real code inspection.</span>
+                      <span class="tooltip-box">AUC change when swapping code windows behind identical rules, measured at L0. A positive delta means the score depends on the code.</span>
                     </span>
                   </th>
                   <th class="px-4 py-3.5">
@@ -593,24 +578,13 @@
                 </tr>
                 <tr>
                   <td class="px-4 py-3.5">
-                    <strong class="text-white">Qwen2.5-Coder-0.5B</strong>
-                    <div class="text-xs text-slate-400">0.5B Dense Causal (FastDecision)</div>
-                  </td>
-                  <td class="px-4 py-3.5"><span class="inline-block rounded border border-border bg-subtle px-1.5 py-0.5 font-mono text-xs text-muted">0.3889 (Collapsed)</span></td>
-                  <td class="px-4 py-3.5">0.5346</td>
-                  <td class="px-4 py-3.5">0.4529</td>
-                  <td class="px-4 py-3.5">-0.0412</td>
-                  <td class="px-4 py-3.5">45 ms / 2.5 GB RAM</td>
-                </tr>
-                <tr>
-                  <td class="px-4 py-3.5">
                     <strong class="text-white">Kev-4B</strong>
                     <div class="text-xs text-slate-400">4B Dense Transformer</div>
                   </td>
                   <td class="px-4 py-3.5">0.6667</td>
                   <td class="px-4 py-3.5">0.7167</td>
                   <td class="px-4 py-3.5">0.5100</td>
-                  <td class="px-4 py-3.5">+0.0210</td>
+                  <td class="px-4 py-3.5">+0.0180</td>
                   <td class="px-4 py-3.5">85 ms / 12.8 GB GPU</td>
                 </tr>
                 <tr class="bg-blue-600/5 text-white">
@@ -646,26 +620,15 @@
                   <td class="px-4 py-3.5">+0.0365</td>
                   <td class="px-4 py-3.5">~456 ms avg (T4 loop)</td>
                 </tr>
-                <tr class="bg-emerald-500/10 text-white">
-                  <td class="px-4 py-3.5">
-                    <strong>Liquid AI d1-3B 50/50 Ensemble</strong>
-                    <div class="text-xs text-slate-400">Targeted Prompt + Contrastive LoRA</div>
-                  </td>
-                  <td class="px-4 py-3.5">N/A</td>
-                  <td class="px-4 py-3.5">0.6125</td>
-                  <td class="px-4 py-3.5"><span class="inline-block rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-xs font-semibold text-emerald-400">0.6280</span></td>
-                  <td class="px-4 py-3.5">+0.0794</td>
-                  <td class="px-4 py-3.5">~1.1 s (2-model loop)</td>
-                </tr>
               </tbody>
             </table>
           </div>
         </div>
 
         <div class="bench-tab-content" id="tab-vul4j" role="tabpanel" aria-labelledby="tab-btn-vul4j" hidden>
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-blue-600/20 bg-blue-600/10 px-5 py-3 text-xs text-dim">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-blue-600/20 bg-blue-600/10 p-4 text-xs text-dim">
             <div>
-              <strong>Vul4J Scan Breakdown:</strong> Semgrep security scan across 126 Vul4J Java repositories (14 changed-file alerts: 5 TP, 9 FP across 10 CVEs).
+              <strong>Vul4J scan breakdown:</strong> Semgrep scan across 126 Vul4J Java repositories (14 changed-file alerts: 5 TP, 9 FP across 10 CVEs). P(TP) and verdict columns are keyword heuristic output (<code class="font-mono">--mock</code>), not the LoRA checkpoint.
             </div>
             <div class="flex flex-wrap gap-3 font-mono text-xs text-slate-300">
               <span><span class="rounded bg-emerald-500/15 px-1.5 py-0.5 font-semibold text-emerald-400">Zero-Shot d1-3B: 0.8000 AUC</span></span>
@@ -819,7 +782,7 @@
         </div>
 
         <div class="bench-tab-content" id="tab-ghsa" role="tabpanel" aria-labelledby="tab-btn-ghsa" hidden>
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-blue-600/20 bg-blue-600/10 px-5 py-3 text-xs text-dim">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-blue-600/20 bg-blue-600/10 p-4 text-xs text-dim">
             <div>
               <strong>GHSA Label Hierarchy:</strong> 174 alerts across 68 advisories checked at four label levels (L0 to L3).
             </div>
@@ -883,24 +846,24 @@
             </table>
           </div>
           <div class="mx-5 my-4 border-t border-dashed border-border pt-2 text-xs text-dim">
-            <strong>Rule-swap check:</strong> Models can score high by learning rule base rates. Shuffling code windows within each rule tests if predictions depend on the code: a rule-only model drops to 0.0000 swap delta. Contrastive LoRA v2 holds +0.0365 (L0) to +0.0724 (L3).
+            A model can score high by learning rule base rates. Shuffling code windows within each rule tests whether predictions depend on the code; a rule-only model scores 0.0000 swap delta. Contrastive LoRA v2 holds +0.0365 (L0) to +0.0724 (L3).
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="border-t border-border py-14 sm:py-18" id="architecture">
+  <section class="border-t border-border pt-16 pb-16 sm:pt-20 sm:pb-20" id="architecture">
     <div class="mx-auto max-w-[1140px] px-6">
       <div class="mb-9">
         <h2 class="mb-3 text-2xl font-bold tracking-tight sm:text-3xl">How d1-triage evaluates alerts</h2>
         <p class="max-w-[72ch] text-base text-muted">
-          Grounding the flagged line and fine-tuning on full enclosing methods pushes the model to inspect guards around the sink.
+          Grounding the flagged line and fine-tuning on full enclosing methods makes the model read the guards around the sink.
         </p>
       </div>
 
       <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface px-6 py-7">
+        <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface p-7">
           <div id="hairline-padlock" class="hairline-mount-box relative mb-3 flex h-[140px] w-full items-center justify-center" title="Pillar 01 - Statement Sink Anchoring (Isometric Padlock)">
             <svg class="flex h-full w-full items-center justify-center opacity-85 transition-opacity hover:opacity-100" viewBox="0 0 200 140" fill="none" stroke="currentColor">
               <rect x="70" y="65" width="60" height="50" rx="8" stroke="#3b82f6" stroke-width="1.8" fill="#111827"/>
@@ -910,13 +873,13 @@
               <path d="M76 110L124 110" stroke="#1f293d" stroke-width="1.2"/>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold tracking-tight text-white">Statement Sink Anchoring</h3>
+          <h3 class="text-lg font-semibold tracking-tight text-white">Statement sink anchoring</h3>
           <p class="text-sm leading-relaxed text-muted">
             <code class="font-mono text-dim">d1_triage/sink_finder.py</code> locates the flagged sink statement (<code class="font-mono text-dim">new File</code>, <code class="font-mono text-dim">dbf.setFeature</code>) and adds <code class="font-mono text-dim">&gt;&gt;&gt; [ALERT LINE]</code>, lifting L0 within-rule AUC from 0.4297 to 0.5986.
           </p>
         </div>
 
-        <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface px-6 py-7">
+        <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface p-7">
           <div id="hairline-sieve" class="hairline-mount-box relative mb-3 flex h-[140px] w-full items-center justify-center" title="Pillar 02 - Zero-Leakage Alert Filter (Isometric Sieve)">
             <svg class="flex h-full w-full items-center justify-center opacity-85 transition-opacity hover:opacity-100" viewBox="0 0 200 140" fill="none" stroke="currentColor">
               <ellipse cx="100" cy="40" rx="46" ry="14" stroke="#93c5fd" stroke-width="1.8" fill="#111827"/>
@@ -929,13 +892,13 @@
               <line x1="80" y1="44" x2="120" y2="36" stroke="#93c5fd" stroke-width="0.8" stroke-dasharray="2 2"/>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold tracking-tight text-white">Full-Method Contrastive LoRA</h3>
+          <h3 class="text-lg font-semibold tracking-tight text-white">Full-method contrastive LoRA</h3>
           <p class="text-sm leading-relaxed text-muted">
             Trained with direct 2-class logit loss and KL anchoring on 1,643 non-test Java methods from 465 held-out commits, with zero overlap against the 68 GHSA evaluation advisories.
           </p>
         </div>
 
-        <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface px-6 py-7">
+        <div class="flex flex-col gap-3 rounded-lg border border-border bg-surface p-7">
           <div id="hairline-relay" class="hairline-mount-box relative mb-3 flex h-[140px] w-full items-center justify-center" title="Pillar 03 - Rule-Swap Scanner-to-Model Pipeline (Isometric Relay)">
             <svg class="flex h-full w-full items-center justify-center opacity-85 transition-opacity hover:opacity-100" viewBox="0 0 200 140" fill="none" stroke="currentColor">
               <polygon points="100,50 124,64 100,78 76,64" stroke="#93c5fd" stroke-width="1.8" fill="#111827"/>
@@ -950,7 +913,7 @@
               <polygon points="148,82 160,89 148,96 136,89" stroke="#93c5fd" stroke-width="1.4" fill="#172033"/>
             </svg>
           </div>
-          <h3 class="text-lg font-semibold tracking-tight text-white">Rule-Swap Control Verification</h3>
+          <h3 class="text-lg font-semibold tracking-tight text-white">Rule-swap control</h3>
           <p class="text-sm leading-relaxed text-muted">
             Swap deltas stay positive across all four levels (+0.0365 on L0 to +0.0724 on L3 for LoRA v2), showing sensitivity to guards in the method body.
           </p>
@@ -959,19 +922,19 @@
     </div>
   </section>
 
-  <section class="border-t border-border py-14 sm:py-18" id="quickstart">
+  <section class="border-t border-border pt-16 pb-16 sm:pt-20 sm:pb-20" id="quickstart">
     <div class="mx-auto max-w-[1140px] px-6">
       <div class="mb-9">
-        <h2 class="mb-3 text-2xl font-bold tracking-tight sm:text-3xl">CLI Quickstart</h2>
+        <h2 class="mb-3 text-2xl font-bold tracking-tight sm:text-3xl">CLI quickstart</h2>
         <p class="max-w-[72ch] text-base text-muted">
-          Run local AST heuristic mode via Python CLI or Docker, or inspect the benchmark metrics in audit/.
+          Run the keyword heuristic mode from Python or Docker, or inspect the benchmark metrics in audit/.
         </p>
       </div>
 
-      <div class="flex max-w-full flex-col gap-4 overflow-hidden rounded-xl border border-border bg-[#0d121c] px-6 py-5 font-mono text-sm">
+      <div class="flex max-w-full flex-col gap-4 overflow-hidden rounded-xl border border-border bg-[#0d121c] p-6 font-mono text-sm">
         <div class="mb-1.5 flex items-center justify-between border-b border-white/10 pb-3">
           <span class="font-mono text-xs font-semibold tracking-wider text-dim">TERMINAL SETUP</span>
-          <button type="button" onclick="navigator.clipboard.writeText('uv tool install git+https://github.com/barryallen16/d1-triage.git\nd1-triage --demo --mock\nd1-triage --benchmark ghsa --limit 10 --mock'); this.querySelector('span').innerText='Copied All!'; setTimeout(() => this.querySelector('span').innerText='Copy All', 1500);" aria-label="Copy all commands" class="cursor-pointer rounded-md border border-border bg-subtle px-2.5 py-1 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
+          <button type="button" onclick="navigator.clipboard.writeText('uv tool install git+https://github.com/barryallen16/d1-triage.git\nd1-triage --demo --mock\nd1-triage --benchmark ghsa --limit 10 --mock'); this.querySelector('span').innerText='Copied All!'; setTimeout(() => this.querySelector('span').innerText='Copy All', 1500);" aria-label="Copy all commands" class="cursor-pointer rounded-md border border-border bg-subtle min-h-11 px-3 py-2 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
             <span>Copy All</span>
           </button>
         </div>
@@ -979,7 +942,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex max-w-full flex-wrap items-center gap-2.5">
             <span class="break-all text-slate-100"><span class="select-none text-dim">$</span> uv tool install git+https://github.com/barryallen16/d1-triage.git</span>
-            <button type="button" onclick="navigator.clipboard.writeText('uv tool install git+https://github.com/barryallen16/d1-triage.git'); this.querySelector('span').innerText='Copied!'; setTimeout(() => this.querySelector('span').innerText='Copy', 1500);" aria-label="Copy install command" class="cursor-pointer rounded border border-border bg-subtle px-2 py-0.5 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
+            <button type="button" onclick="navigator.clipboard.writeText('uv tool install git+https://github.com/barryallen16/d1-triage.git'); this.querySelector('span').innerText='Copied!'; setTimeout(() => this.querySelector('span').innerText='Copy', 1500);" aria-label="Copy install command" class="cursor-pointer rounded border border-border bg-subtle min-h-11 px-3 py-2 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
               <span>Copy</span>
             </button>
           </div>
@@ -989,7 +952,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex max-w-full flex-wrap items-center gap-2.5">
             <span class="break-all text-slate-100"><span class="select-none text-dim">$</span> d1-triage --demo --mock</span>
-            <button type="button" onclick="navigator.clipboard.writeText('d1-triage --demo --mock'); this.querySelector('span').innerText='Copied!'; setTimeout(() => this.querySelector('span').innerText='Copy', 1500);" aria-label="Copy demo command" class="cursor-pointer rounded border border-border bg-subtle px-2 py-0.5 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
+            <button type="button" onclick="navigator.clipboard.writeText('d1-triage --demo --mock'); this.querySelector('span').innerText='Copied!'; setTimeout(() => this.querySelector('span').innerText='Copy', 1500);" aria-label="Copy demo command" class="cursor-pointer rounded border border-border bg-subtle min-h-11 px-3 py-2 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
               <span>Copy</span>
             </button>
           </div>
@@ -999,7 +962,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex max-w-full flex-wrap items-center gap-2.5">
             <span class="break-all text-slate-100"><span class="select-none text-dim">$</span> d1-triage --benchmark ghsa --limit 10 --mock</span>
-            <button type="button" onclick="navigator.clipboard.writeText('d1-triage --benchmark ghsa --limit 10 --mock'); this.querySelector('span').innerText='Copied!'; setTimeout(() => this.querySelector('span').innerText='Copy', 1500);" aria-label="Copy benchmark command" class="cursor-pointer rounded border border-border bg-subtle px-2 py-0.5 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
+            <button type="button" onclick="navigator.clipboard.writeText('d1-triage --benchmark ghsa --limit 10 --mock'); this.querySelector('span').innerText='Copied!'; setTimeout(() => this.querySelector('span').innerText='Copy', 1500);" aria-label="Copy benchmark command" class="cursor-pointer rounded border border-border bg-subtle min-h-11 px-3 py-2 font-sans text-xs font-medium text-muted transition hover:bg-[#1f2a40] hover:text-white active:scale-95">
               <span>Copy</span>
             </button>
           </div>
@@ -1009,10 +972,10 @@
     </div>
   </section>
 
-  <section class="border-t border-border py-14 sm:py-18" id="artifacts">
+  <section class="border-t border-border pt-16 pb-16 sm:pt-20 sm:pb-20" id="artifacts">
     <div class="mx-auto max-w-[1140px] px-6">
       <div class="mb-9">
-        <h2 class="mb-3 text-2xl font-bold tracking-tight sm:text-3xl">Published Artifacts</h2>
+        <h2 class="mb-3 text-2xl font-bold tracking-tight sm:text-3xl">Published artifacts</h2>
         <p class="max-w-[72ch] text-base text-muted">
           Model weights, benchmark datasets, audit notes, and the CLI live on Hugging Face and GitHub.
         </p>
@@ -1079,7 +1042,7 @@
           <div class="flex flex-col gap-1.5">
             <h3 class="text-base font-bold text-white">GitHub Repository</h3>
             <span class="break-all font-mono text-xs text-dim">barryallen16/d1-triage</span>
-            <p class="mt-0.5 text-xs leading-normal text-muted">Standalone CLI, AST grounding engine, Semgrep parser, and full test suite under Apache-2.0.</p>
+            <p class="mt-0.5 text-xs leading-normal text-muted">Standalone CLI, sink-grounding engine, Semgrep parser, and test suite under Apache-2.0.</p>
           </div>
           <div class="inline-flex items-center gap-1.5 border-t border-dashed border-white/10 pt-2.5 text-xs font-semibold text-pink transition-all group-hover:gap-2.5 group-hover:text-white">
             <span>Star on GitHub</span>
@@ -1094,12 +1057,12 @@
     <div class="mx-auto flex max-w-[1140px] flex-col items-start justify-between gap-4 px-6 sm:flex-row sm:items-center">
       <div class="flex items-center gap-2">
         <img src="d1.svg" alt="" width="22" height="18" class="block">
-        <span><strong class="text-white">d1-triage</strong> - Apache-2.0 License. Built for AppSec engineers.</span>
+        <span><strong class="text-white">d1-triage</strong> - Apache-2.0 License.</span>
       </div>
       <ul class="flex list-none gap-6">
-        <li><a href="https://github.com/barryallen16/d1-triage" target="_blank" rel="noreferrer" class="text-muted transition-colors hover:text-white">GitHub</a></li>
-        <li><a href="https://huggingface.co/barryallen16/d1-3B-java-vuln-triage" target="_blank" rel="noreferrer" class="text-muted transition-colors hover:text-white">Hugging Face Model</a></li>
-        <li><a href="https://github.com/barryallen16/d1-triage/blob/main/audit/TECHNICAL_REPORT.md" target="_blank" rel="noreferrer" class="text-muted transition-colors hover:text-white">Technical Report</a></li>
+        <li><a href="https://github.com/barryallen16/d1-triage" target="_blank" rel="noreferrer" class="inline-block py-3 text-muted transition-colors hover:text-white">GitHub</a></li>
+        <li><a href="https://huggingface.co/barryallen16/d1-3B-java-vuln-triage" target="_blank" rel="noreferrer" class="inline-block py-3 text-muted transition-colors hover:text-white">Hugging Face Model</a></li>
+        <li><a href="https://github.com/barryallen16/d1-triage/blob/main/audit/TECHNICAL_REPORT.md" target="_blank" rel="noreferrer" class="inline-block py-3 text-muted transition-colors hover:text-white">Technical Report</a></li>
       </ul>
     </div>
   </footer>

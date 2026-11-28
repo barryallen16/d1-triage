@@ -1,4 +1,4 @@
-"""Decision-model scorer for B2/B3: state, one bounded question, typed options.
+"""Decision-model scorer: state, one bounded question, typed options.
 
 The shape follows SemIf (formerly OpenJev): the state and the option
 descriptions go into one prompt, and the score is read from the option logits

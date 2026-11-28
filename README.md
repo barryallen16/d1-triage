@@ -9,10 +9,14 @@
   <a href="audit/TECHNICAL_REPORT.md"><img src="https://img.shields.io/badge/Audit-Technical%20Report-purple?style=flat-square" alt="Technical Report"></a>
 </p>
 
-# d1-triage: Static analysis alert triage with Liquid AI d1-3B
+# d1-triage: Static Analysis Alert Triage with Liquid AI d1-3B
 
 Static analysis scanners flag Java security patterns with high recall, and false positives often exceed 70%.
-`d1-triage` benchmarks Liquid AI's hybrid `d1-3B` model on ranking Semgrep alerts by exploitability and includes a local CLI with an AST heuristic mode for dry runs.
+`d1-triage` benchmarks Liquid AI's hybrid `d1-3B` on ranking Semgrep alerts by exploitability, and includes a local CLI with a keyword heuristic mode for dry runs.
+
+The short version: zero-shot `d1-3B` scores `0.8372` L3 AUC mostly on rule-name priors.
+Tagging the sink line and fine-tuning on full methods make it read the code, and the best checkpoint still leaves about 70% of the accepted queue false at 90% recall.
+It ranks a review queue; it does not suppress alerts.
 
 ## Quickstart
 
@@ -28,7 +32,7 @@ Or with `pip`:
 pip install git+https://github.com/barryallen16/d1-triage.git
 ```
 
-Run the CLI locally in heuristic mock mode (`--mock`, no model download required):
+Run the CLI locally in heuristic mock mode (`--mock`, no model download):
 
 ```bash
 d1-triage --demo --mock
@@ -36,7 +40,7 @@ d1-triage --scan semgrep-findings.json --mock --output triage-report.json
 d1-triage --benchmark ghsa --limit 5 --mock
 ```
 
-The local CLI and GitHub Pages demo run the AST heuristic baseline (`--mock`) for offline feedback.
+The local CLI and GitHub Pages demo run the keyword heuristic baseline (`--mock`) for offline feedback.
 Logit scoring with `d1-3B` runs through the Hugging Face model and the training scripts in `audit/`.
 
 ## Benchmark leaderboard
@@ -66,7 +70,8 @@ Adding `>>> [ALERT LINE X]` at the matched sink line forces code sensitivity, li
 
 Fine-tuning on synthetic Juliet cases hurt real-world transfer (`0.449` within-rule AUC).
 Naive short-hunk LoRA training (`r=16`, `lr=1e-4`, `line=0`) also lowered overall L3 AUC (`0.5988`) and Vul4J (`0.5444`).
-Building a `1,643`-row full-method dataset from `465` held-out commits ([audit/full_method_train.jsonl](audit/full_method_train.jsonl)) and training `d1-3B` with a 2-class `yes`/`no` logit readout loss (`3x` Semgrep upweighting, `KL=0.2` base anchor, `2` epochs) lifted GHSA L3 AUC to `0.8339` (`+0.2351` over naive LoRA, beating `Kev-4B` at `0.7167`), L2 AUC to `0.7977`, L0 AUC to `0.7119`, L3 `P@90R` to `0.3023` (nearly double the heuristic's `0.1609`), and L3 swap delta to `+0.0724` (`0.6027` L3 within-rule AUC).
+
+A `1,643`-row full-method dataset built from `465` held-out commits ([audit/full_method_train.jsonl](audit/full_method_train.jsonl)), trained with a 2-class `yes`/`no` logit readout loss (`3x` Semgrep upweighting, `KL=0.2` base anchor, `2` epochs), reached `0.8339` GHSA L3 AUC (`+0.2351` over naive LoRA and above `Kev-4B` at `0.7167`), `0.7977` L2, `0.7119` L0, and `0.3023` L3 `P@90R` (nearly double the heuristic's `0.1609`), with a `+0.0724` L3 swap delta (`0.6027` L3 within-rule AUC).
 A higher KL anchor (`KL=0.5`, `1` epoch) trades peak GHSA L3 AUC (`0.7083`) for stronger out-of-distribution retention on Vul4J (`0.6889`, `P@90R = 0.5556`) and L2 within-rule separation (`0.6595`).
 With `P@90R = 0.3023` on L3, the model fits triage ranking, not autonomous suppression.
 

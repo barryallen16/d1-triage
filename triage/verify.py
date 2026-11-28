@@ -1,4 +1,4 @@
-"""Phase 4 checker: does a patch compile, kill the warning, and add no new ones?
+"""Check whether a patch compiles, kills the warning, and adds no new ones.
 
 Usage:
   python -m triage.verify --project . --file src/Foo.java \

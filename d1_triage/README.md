@@ -1,13 +1,13 @@
 # d1-triage: local static analysis alert triage CLI
 
-`d1-triage` inspects Java security alerts using statement-level sink marking and an AST heuristic baseline (`--mock`) for fast offline testing.
+`d1-triage` inspects Java security alerts using statement-level sink marking and a keyword heuristic baseline (`--mock`) for fast offline testing.
 It reads Semgrep JSON scan reports or the included GHSA and Vul4J benchmark samples and ranks findings by `P(TP)`.
 
 ## What it does
 
 - Matches and tags the flagged sink line with `>>> [ALERT LINE n]` via `d1_triage/sink_finder.py`.
 - Parses Semgrep JSON reports and expands source context around the flagged line when source files exist on disk.
-- Ranks alerts with AST guard checks in `--mock` mode or writes JSON triage reports with `-o`.
+- Ranks alerts with keyword guard checks in `--mock` mode, or writes JSON triage reports with `-o`.
 
 ## Quick start
 
@@ -44,7 +44,7 @@ For real `LiquidAI/d1-3B` scoring, use the scripts under `audit/` or `scripts/te
 | `--limit <n>` | Number of benchmark findings to inspect | 5 |
 | `--cpu` | Force CPU flag in config | Auto-detect |
 | `--gpu` | Force CUDA flag in config | Auto-detect |
-| `--mock` | Run the AST heuristic baseline with no model download | False |
+| `--mock` | Run the keyword heuristic baseline with no model download | False |
 | `--threshold <f>` | Exploitability decision cutoff | 0.5 |
 | `--output <path>` | Export JSON results to path | None |
 | `--model <id>` | Hugging Face model ID or local path | LiquidAI/d1-3B |

@@ -1,8 +1,8 @@
 # Run d1-triage locally
 
-This guide explains how to run the `d1-triage` CLI in heuristic mock mode and the `triage` scoring module.
+This guide covers the `d1-triage` CLI in heuristic mock mode and the `triage` scoring module.
 
-## 1. Local CLI (AST heuristic mode)
+## 1. Local CLI (keyword heuristic mode)
 
 Set up the environment with `uv`:
 
@@ -23,8 +23,6 @@ Omitting `--mock` raises a `RuntimeError` because the standalone CLI does not bu
 
 ## 2. Docker container
 
-Build and run the CLI in Docker:
-
 ```bash
 docker build -t d1-triage .
 docker run --rm d1-triage --demo --mock
@@ -33,9 +31,10 @@ docker run --rm -v $(pwd)/my-project:/src d1-triage --scan /src/findings.json --
 
 ## 3. Scoring module (`triage.cli`)
 
-`triage.cli` supports both the heuristic baseline and a QLoRA adapter on CUDA (`Qwen/Qwen3.5-4B` via `unsloth`):
+`triage.cli` runs the heuristic baseline, a generation scorer, or the Qwen3.5-4B decision scorer.
+The model scorers need CUDA and `unsloth`:
 
 ```bash
 uv run python -m triage.cli path/to/java/project --scorer heuristic --json
-uv run python -m triage.cli path/to/java/project --adapter path/to/adapter --json
+uv run python -m triage.cli path/to/java/project --scorer decision --adapter path/to/adapter --json
 ```
