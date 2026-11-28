@@ -53,7 +53,6 @@ def test_neutralize_flips_prefix_per_row():
     for out in (out_a, out_b):
         assert "good1" not in out and "bad2" not in out
 
-
     good_a_funcA = out_a.find("funcA1") < out_a.find("funcB1")
     good_b_funcA = out_b.find("funcA1") < out_b.find("funcB1")
     assert good_a_funcA != good_b_funcA

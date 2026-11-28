@@ -87,7 +87,6 @@ def generate_explanation(finding: TriageFinding, is_exploitable: bool, sink_stmt
             return f"Plaintext network socket created at '{sink_stmt}' without TLS encryption (SSLSocket)."
         return f"Network socket at '{sink_stmt}' operates on localhost loopback or is wrapped in TLS."
 
-
     if is_exploitable:
         return f"Exploitable security sink detected at line {finding.line_number} ('{sink_stmt}') without neutralizing guards."
     return f"Safe pattern: flagged sink at line {finding.line_number} is neutralized by defensive validation or static context."
@@ -99,18 +98,15 @@ def evaluate_ast_heuristics(code_window: str, rule: str, cwe: str) -> float:
     rule_lower = rule.lower()
     cwe_lower = cwe.lower()
 
-
     if "path" in rule_lower or "cwe-22" in cwe_lower:
         if any(g in code_window for g in ["getCanonicalPath().startsWith", "toRealPath", "normalize()", "startsWith(base"]):
             return 0.032
         return 0.968
 
-
     if "xml" in rule_lower or "xxe" in rule_lower or "documentbuilder" in rule_lower or "cwe-611" in cwe_lower:
         if any(g in code_window for g in ["FEATURE_SECURE_PROCESSING", "disallow-doctype-decl", "load-external-dtd"]):
             return 0.028
         return 0.975
-
 
     if "sql" in rule_lower or "cwe-89" in cwe_lower:
         if "preparedstatement" in code_lower and "?" in code_window and any(s in code_window for s in ["setString", "setInt", "setLong"]):
@@ -119,18 +115,15 @@ def evaluate_ast_heuristics(code_window: str, rule: str, cwe: str) -> float:
             return 0.982
         return 0.045 if "?" in code_window else 0.950
 
-
     if "exec" in rule_lower or "command" in rule_lower or "cwe-78" in cwe_lower:
         if any(g in code_window for g in ["ProcessBuilder", "String[]"]) and "+" not in code_window:
             return 0.040
         return 0.985
 
-
     if "deserial" in rule_lower or "cwe-502" in cwe_lower:
         if any(g in code_window for g in ["ClassFilter", "setObjectInputFilter", "ValidatingObjectInputStream"]):
             return 0.035
         return 0.970
-
 
     if any(g in code_lower for g in ["validate", "whitelist", "sanitize", "check", "guard"]):
         return 0.250
@@ -142,24 +135,101 @@ class D1TriageEngine:
         self.model_name = model_name
         self.mock = mock
         self.explain = explain
+        self._requested_device = device
         self._device = device or "cpu"
+        self._model = None
+        self._gguf = None
+        self._yes_ids: list[int] = []
+        self._no_ids: list[int] = []
 
     @property
     def device(self) -> str:
         return self._device
 
+    def _ensure_loaded(self) -> None:
+        if self._model is not None or self._gguf is not None:
+            return
+
+        if str(self.model_name).lower().endswith(".gguf"):
+            try:
+                import llama_cpp
+            except ImportError as exc:
+                raise RuntimeError(
+                    f"GGUF inference requires llama-cpp-python ({exc}). Pass --mock for AST heuristic scoring."
+                ) from exc
+            self._gguf = llama_cpp.Llama(
+                model_path=self.model_name,
+                n_ctx=2048,
+                n_threads=4,
+                logits_all=True,
+                verbose=False,
+            )
+            self._yes_ids = list({self._gguf.tokenize(w.encode("utf-8"))[-1] for w in ("yes", "Yes", "YES", " yes", " Yes")})
+            self._no_ids = list({self._gguf.tokenize(w.encode("utf-8"))[-1] for w in ("no", "No", "NO", " no", " No")})
+            self._device = "cpu"
+            return
+
+        try:
+            import torch
+            from transformers import AutoModel
+        except ImportError as exc:
+            raise RuntimeError(
+                f"Live inference requires optional model dependencies (`pip install '.[model]'`): {exc}. "
+                "Pass --mock for AST heuristic scoring."
+            ) from exc
+
+        target_device = self._requested_device or ("cuda" if torch.cuda.is_available() else "cpu")
+        dtype = torch.float16 if target_device == "cuda" else torch.float32
+        self._model = AutoModel.from_pretrained(
+            self.model_name,
+            trust_remote_code=True,
+            torch_dtype=dtype,
+        ).to(target_device)
+        self._device = target_device
+
+    def _score_live(self, finding: TriageFinding) -> float:
+        import math
+
+        self._ensure_loaded()
+        state = build_annotated_prompt(
+            finding.code_window,
+            finding.rule,
+            finding.cwe,
+            finding.line_number,
+            finding.file_path,
+            finding.message,
+        )
+
+        if self._gguf is not None:
+            prompt = (
+                f"<|im_start|>user\n{state}\n\nQUESTION:\n{TRIAGE_QUESTION}\n"
+                f"Yes: {TRIAGE_CRITERIA['true']}\nNo: {TRIAGE_CRITERIA['false']}\n\n"
+                "Reply with yes or no only.<|im_end|>\n<|im_start|>assistant\n"
+            )
+            self._gguf.reset()
+            self._gguf.eval(self._gguf.tokenize(prompt.encode("utf-8")))
+            logits = self._gguf.eval_logits[-1]
+            s_yes = max(float(logits[i]) for i in self._yes_ids)
+            s_no = max(float(logits[i]) for i in self._no_ids)
+            m = max(s_yes, s_no)
+            e_yes = math.exp(s_yes - m)
+            return e_yes / (e_yes + math.exp(s_no - m))
+
+        import torch
+
+        with torch.inference_mode():
+            answers = self._model.system_one_batch([(state, QUESTIONS)])
+        return float(answers[0]["answers"]["tp"]["noul"])
+
     def triage_one(self, finding: TriageFinding, threshold: float = 0.5) -> TriageResult:
         """Triage a single finding with statement-level sink grounding."""
         _sink_idx, sink_stmt = find_sink_line(finding.code_window, finding.rule)
 
-        if not self.mock:
-            raise RuntimeError(
-                f"Live inference for {self.model_name} is not wired in this local CLI. "
-                "Pass --mock (mock=True) to run the AST heuristic baseline."
-            )
-
         t0 = time.perf_counter()
-        p_tp = evaluate_ast_heuristics(finding.code_window, finding.rule, finding.cwe)
+        if self.mock:
+            p_tp = evaluate_ast_heuristics(finding.code_window, finding.rule, finding.cwe)
+        else:
+            p_tp = self._score_live(finding)
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
         is_tp = p_tp >= threshold

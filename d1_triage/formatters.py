@@ -37,7 +37,6 @@ def print_terminal_results(results: list[TriageResult], model_name: str = "Liqui
         print(f"False Positives (Filtered): {total_fp}")
         return
 
-
     table = Table(
         title=f"Static Analysis Triage Report ({model_name} on {device.upper()})",
         show_header=True,
@@ -82,7 +81,6 @@ def print_terminal_results(results: list[TriageResult], model_name: str = "Liqui
 
     console.print()
     console.print(table)
-
 
     if show_explanations and any(r.explanation for r in results):
         exp_lines = []

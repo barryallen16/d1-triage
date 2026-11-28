@@ -6,7 +6,6 @@ Serves the static site and provides a live JSON triage endpoint:
 import argparse
 import json
 import os
-import sys
 import threading
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -23,7 +22,9 @@ _lock = threading.Lock()
 def get_engine():
     global _engine
     if _engine is None:
-        _engine = D1TriageEngine(model_name=MODEL_NAME, explain=True)
+        use_mock = os.environ.get("D1_TRIAGE_MOCK", "false").lower() in ("1", "true")
+        model = os.environ.get("MODEL_NAME", MODEL_NAME)
+        _engine = D1TriageEngine(model_name=model, mock=use_mock, explain=True)
     return _engine
 
 
@@ -32,7 +33,9 @@ class TriageHTTPHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(SITE_DIR), **kwargs)
 
     def end_headers(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin", "")
+        if origin.startswith(("http://localhost:", "http://127.0.0.1:", "http://localhost", "http://127.0.0.1")):
+            self.send_header("Access-Control-Allow-Origin", origin)
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -114,17 +117,16 @@ class TriageHTTPHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
 
-def run_server(port: int = 8000, host: str = "0.0.0.0"):
+def run_server(port: int = 8000, host: str = "127.0.0.1"):
     server_address = (host, port)
-    get_engine()
     httpd = ThreadingHTTPServer(server_address, TriageHTTPHandler)
-    print(f"d1-triage server running at http://localhost:{port}/ (serving {SITE_DIR})")
+    print(f"d1-triage server running at http://{host}:{port}/ (serving {SITE_DIR})")
     httpd.serve_forever()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="d1-triage Site & API Server")
     parser.add_argument("--port", type=int, default=8000, help="Port to listen on (default: 8000)")
-    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host address (default: 0.0.0.0)")
+    parser.add_argument("--host", type=str, default="127.0.0.1", help="Host address (default: 127.0.0.1)")
     args = parser.parse_args()
     run_server(port=args.port, host=args.host)

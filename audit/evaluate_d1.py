@@ -160,7 +160,6 @@ def main():
     elif args.lora:
         variants = {"d1-3B Contrastive LoRA": variants["d1-3B Contrastive LoRA"]}
 
-
     print(f"\n{'Variant':<25} | {'Level':<18} | {'AUC':<7} | {'P@90R':<7} | {'Within-AUC':<10} | {'Swap Delta':<10}")
     print("-" * 88)
 
@@ -179,7 +178,6 @@ def main():
             for dname, met in res.items():
                 print(f"{vname:<25} | {dname:<18} | {met['auc']:.4f}  | {met['p90']:.4f}  | {met['within_auc']:.4f}     | {met['delta_swap']:+.4f}")
             print("-" * 88)
-
 
     vul4j_file = DATA_DIR / "vul4j-eval" / "scan-labeled.jsonl"
     if vul4j_file.exists():

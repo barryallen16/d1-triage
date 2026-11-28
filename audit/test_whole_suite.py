@@ -37,7 +37,6 @@ def test_1_benchmark_data_integrity():
         ghsa_rows = [json.loads(l) for l in open(ghsa_path, encoding="utf-8") if l.strip()]
         log_test("GHSA Evaluation Set Exists & Has Exactly 174 Rows", len(ghsa_rows) == 174, f"Found {len(ghsa_rows)} rows")
 
-
     vul4j_path = DATA / "vul4j-eval" / "scan-labeled.jsonl"
     if not vul4j_path.exists():
         log_test("Vul4J Evaluation Set Exists & Has Exactly 14 Rows", False, f"Missing: {vul4j_path}")
@@ -46,11 +45,9 @@ def test_1_benchmark_data_integrity():
         vul4j_rows = [json.loads(l) for l in open(vul4j_path, encoding="utf-8") if l.strip()]
         log_test("Vul4J Evaluation Set Exists & Has Exactly 14 Rows", len(vul4j_rows) == 14, f"Found {len(vul4j_rows)} rows")
 
-
     relabel_path = AUDIT / "relabel.json"
     relabel = json.loads(open(relabel_path, encoding="utf-8").read())
     log_test("Audit Relabel Mapping Exists & Covers 174 IDs", len(relabel) == 174, f"Mapped {len(relabel)} items")
-
 
     train_path = AUDIT / "contrastive_train.jsonl"
     train_rows = [json.loads(l) for l in open(train_path, encoding="utf-8") if l.strip()]
@@ -58,7 +55,6 @@ def test_1_benchmark_data_integrity():
     fps = sum(1 for r in train_rows if r["label"] == "FP")
     log_test("Contrastive Training Set Has Exactly 416 Balanced Rows", len(train_rows) == 416 and tps == 208 and fps == 208,
              f"Total: {len(train_rows)} | TP: {tps} | FP: {fps}")
-
 
     if ghsa_rows:
         eval_vuls = {r["vul_id"] for r in ghsa_rows}
@@ -99,7 +95,6 @@ def test_3_evaluation_harnesses():
     success = (proc.returncode == 0) and ("L3 (Clean hunk + CWE)" in out) and ("Vul4J Benchmark Evaluation" in out)
     log_test("evaluate_d1.py executes cleanly (Exit Code 0)", success, f"Output length: {len(out)} chars")
 
-
     proc2 = subprocess.run([sys.executable, str(AUDIT / "compare_all_phases.py")], capture_output=True, text=True)
     out2 = proc2.stdout
     success2 = (proc2.returncode == 0) and ("Heuristic Baseline" in out2) and ("Phase 3 (Contrastive LoRA)" in out2)
@@ -111,7 +106,6 @@ def test_4_sink_finder():
     sys.path.insert(0, str(ROOT))
     from d1_triage.sink_finder import build_annotated_prompt, find_sink_line
 
-
     code_pt = """public void read(String path) {
     File f = new File(baseDir, path);
     FileInputStream fis = new FileInputStream(f);
@@ -119,14 +113,12 @@ def test_4_sink_finder():
     idx, stmt = find_sink_line(code_pt, "java.lang.security.audit.path-traversal")
     log_test("Sink Finder catches 'new File' in Path Traversal", "new File" in stmt, f"Matched statement: '{stmt}'")
 
-
     code_xml = """public void parse(InputStream is) {
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 }"""
     idx_xml, stmt_xml = find_sink_line(code_xml, "documentbuilderfactory")
     log_test("Sink Finder catches 'DocumentBuilderFactory' in XXE", "DocumentBuilderFactory" in stmt_xml, f"Matched statement: '{stmt_xml}'")
-
 
     prompt = build_annotated_prompt(code_pt, "path-traversal", "CWE-22", 15)
     log_test("Annotated Prompt contains '>>> [ALERT LINE 15]'", ">>> [ALERT LINE 15]:" in prompt, "Sink line properly marked")
@@ -139,14 +131,11 @@ def test_5_d1_triage_cli():
     log_test("d1_triage --demo --mock runs with Rich formatting", p1.returncode == 0 and "Triage Summary" in p1.stdout,
              f"Output lines: {len(p1.stdout.splitlines())}")
 
-
     p2 = subprocess.run([sys.executable, "d1_triage.py", "--benchmark", "ghsa", "--limit", "3", "--mock"], capture_output=True, text=True, cwd=str(ROOT))
     log_test("d1_triage --benchmark ghsa --limit 3 --mock", p2.returncode == 0 and "Total Alerts Analyzed: 3" in p2.stdout)
 
-
     p3 = subprocess.run([sys.executable, "d1_triage.py", "--benchmark", "vul4j", "--limit", "2", "--mock"], capture_output=True, text=True, cwd=str(ROOT))
     log_test("d1_triage --benchmark vul4j --limit 2 --mock", p3.returncode == 0 and "Total Alerts Analyzed: 2" in p3.stdout)
-
 
     test_json_out = ROOT / "test_out.json"
     if test_json_out.exists():

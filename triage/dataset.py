@@ -345,7 +345,6 @@ def build(scan_path, suite, out, test_families, val_families, seed=1611):
         })
         stats[label] += 1
 
-
     hashes = defaultdict(set)
     for r in rows:
         h = hashlib.sha256(re.sub(r"\s+", "", r["code_window"]).encode()).hexdigest()

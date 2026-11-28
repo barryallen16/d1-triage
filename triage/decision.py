@@ -67,7 +67,6 @@ def option_token_ids(tokenizer):
     ids = []
     for option in OPTIONS:
 
-
         encoded = tokenizer(text=" " + option["id"], add_special_tokens=False).input_ids
         if len(encoded) != 1:
             raise ValueError(

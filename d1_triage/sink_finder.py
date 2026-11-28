@@ -32,12 +32,10 @@ def find_sink_line(code_window: str, rule_name: str) -> tuple[int, str]:
     rule_key = rule_name.lower().split('.')[-1]
     patterns = RULE_PATTERNS.get(rule_key, [])
 
-
     for pat in patterns:
         for idx, line in enumerate(lines):
             if re.search(pat, line, re.IGNORECASE):
                 return idx, line.strip()
-
 
     mid = len(lines) // 2
     for offset in range(len(lines)):

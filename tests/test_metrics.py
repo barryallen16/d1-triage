@@ -17,7 +17,6 @@ def test_precision_at_recall_mixed():
     y = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
     score = np.linspace(0.9, 0.1, 10)
 
-
     p, r = precision_at_recall(y, score, 0.9)
     assert p == 5 / 9
     assert r == 1.0

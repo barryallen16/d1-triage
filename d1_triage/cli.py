@@ -62,7 +62,6 @@ def load_semgrep_json(json_path: Path) -> list[TriageFinding]:
         msg = r.get("extra", {}).get("message", "")
         code_lines = r.get("extra", {}).get("lines", "")
 
-
         path_obj = Path(path)
         if not path_obj.is_absolute():
             candidate = json_path.parent / path_obj
@@ -140,9 +139,7 @@ def main():
 
     args = parser.parse_args()
 
-
     device = "cpu" if args.cpu else ("cuda" if args.gpu else None)
-
 
     if args.demo:
         findings = DEMO_FINDINGS
@@ -156,24 +153,17 @@ def main():
         findings = load_benchmark_sample(args.benchmark, limit=args.limit)
         print(f"\n[d1-triage] Loaded {len(findings)} findings from {args.benchmark.upper()} benchmark")
     else:
-
         print("\nNo scan input specified. Defaulting to --demo.")
         print("Use 'python -m d1_triage --help' or 'python d1_triage.py --help' to see all options.\n")
         findings = DEMO_FINDINGS
-
 
     engine = D1TriageEngine(
         model_name=args.model,
         device=device,
         mock=args.mock,
     )
-
-
     results = engine.triage_batch(findings, threshold=args.threshold)
-
-
     print_terminal_results(results, model_name=args.model, device=engine.device)
-
 
     if args.output:
         save_json_report(results, args.output)

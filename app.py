@@ -14,11 +14,8 @@ from d1_triage.sink_finder import find_sink_line
 
 USE_MOCK = os.environ.get("D1_TRIAGE_MOCK", "false").lower() in ("1", "true")
 MODEL_NAME = os.environ.get("MODEL_NAME", "LiquidAI/d1-3B")
-QUANT_FORMAT = os.environ.get("QUANT_FORMAT", "Q8_0")
-GGUF_REPO = "LiquidAI/d1-3B-GGUF"
-GGUF_FILENAME = "d1-3B-Q8_0.gguf"
 
-print(f"Initializing d1-triage Engine (Mock: {USE_MOCK}, Model: {MODEL_NAME}, Quant: {QUANT_FORMAT})...")
+print(f"Initializing d1-triage Engine (Mock: {USE_MOCK}, Model: {MODEL_NAME})...")
 try:
     engine = D1TriageEngine(model_name=MODEL_NAME, mock=USE_MOCK, explain=True)
 except Exception as e:
@@ -152,17 +149,6 @@ def load_preset(preset_key: str):
         data.get("line", 1),
     )
 
-
-custom_css = """
-.verdict-box {
-    font-size: 1.25rem !important;
-    font-weight: 700 !important;
-}
-.stat-box {
-    border-radius: 8px;
-    padding: 10px;
-}
-"""
 
 with gr.Blocks(title="d1-triage - Java SAST Alert Triage") as demo:
     gr.Markdown(

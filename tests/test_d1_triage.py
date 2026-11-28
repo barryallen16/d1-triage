@@ -66,9 +66,37 @@ def test_engine_mock_triage_one():
     assert result.latency_ms >= 0.0
 
 
-def test_engine_non_mock_fails_loudly():
+def test_engine_live_inference_uses_model_system_one(monkeypatch):
+    import contextlib
+    import sys
+    import types
     import pytest
-    engine = D1TriageEngine(mock=False)
+
+    captured = {}
+
+    class DummyModel:
+        def to(self, device):
+            captured["device"] = device
+            return self
+
+        def system_one_batch(self, items):
+            captured["items"] = items
+            return [{"answers": {"tp": {"noul": 0.87}}}]
+
+    fake_torch = types.SimpleNamespace(
+        float16="float16",
+        float32="float32",
+        cuda=types.SimpleNamespace(is_available=lambda: False),
+        inference_mode=contextlib.nullcontext,
+    )
+    fake_auto_model = types.SimpleNamespace(
+        from_pretrained=lambda name, **kw: captured.update({"model": name, "kw": kw}) or DummyModel()
+    )
+    fake_transformers = types.SimpleNamespace(AutoModel=fake_auto_model)
+    monkeypatch.setitem(sys.modules, "torch", fake_torch)
+    monkeypatch.setitem(sys.modules, "transformers", fake_transformers)
+
+    engine = D1TriageEngine(model_name="barryallen16/d1-3B-java-vuln-triage", mock=False)
     finding = TriageFinding(
         id="TEST-02",
         rule="java.lang.security.audit.path-traversal",
@@ -77,7 +105,37 @@ def test_engine_non_mock_fails_loudly():
         line_number=42,
         code_window="File f = new File(baseDir, userInput);",
     )
-    with pytest.raises(RuntimeError, match="mock=True"):
+    result = engine.triage_one(finding)
+    assert captured["model"] == "barryallen16/d1-3B-java-vuln-triage"
+    assert captured["kw"]["trust_remote_code"] is True
+    assert captured["device"] == "cpu"
+    assert ">>> [ALERT LINE 42]:" in captured["items"][0][0]
+    assert result.p_tp == pytest.approx(0.87)
+    assert result.is_exploitable is True
+
+
+def test_engine_live_missing_model_deps_fails_clearly(monkeypatch):
+    import builtins
+    import pytest
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name in ("torch", "transformers"):
+            raise ImportError("No module named " + name)
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    engine = D1TriageEngine(mock=False)
+    finding = TriageFinding(
+        id="TEST-03",
+        rule="java.lang.security.audit.path-traversal",
+        cwe="CWE-22",
+        file_path="src/App.java",
+        line_number=42,
+        code_window="File f = new File(baseDir, userInput);",
+    )
+    with pytest.raises(RuntimeError, match="--mock"):
         engine.triage_one(finding)
 
 

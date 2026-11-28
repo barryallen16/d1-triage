@@ -41,7 +41,6 @@ try:
             speed_mb = (downloaded / (1024 * 1024)) / max(0.1, elapsed)
             pct = (downloaded / total_size) * 100
 
-
             if downloaded - last_print >= 100 * 1024 * 1024 or downloaded >= total_size:
                 last_print = downloaded
                 rem_mb = (total_size - downloaded) / (1024 * 1024)
